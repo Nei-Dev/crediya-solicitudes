@@ -334,3 +334,7 @@ gradle-app.setting
 # -----
 *.hprof
 build-cache
+
+/postgres_data
+
+.env

@@ -1,4 +1,4 @@
-package com.crediya.model.creditapplication;
+package com.crediya.model.credittype;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,13 +11,13 @@ import java.math.BigDecimal;
 @Setter
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class CreditApplication {
-	
-	private Long id;
-	private BigDecimal amount;
-	private Integer term;
-	private String email;
+public class CreditType {
+
 	private Long idCreditType;
-	private StateCreditApplication state;
+	private String name;
+	private BigDecimal minimumAmount;
+	private BigDecimal maximumAmount;
+	private BigDecimal interestRate;
+	private Boolean autoValidation;
 	
 }

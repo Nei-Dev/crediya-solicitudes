@@ -6,9 +6,15 @@ spring:
     name: solicitudes
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: /h2
-  profiles:
-    include:
+adapters:
+  r2dbc:
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5441}
+    database: ${DB_NAME:solicitudes_db}
+    schema: ${DB_SCHEMA:public}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+logging:
+  level:
+    com:
+      crediya: ${LOG_LEVEL:INFO}

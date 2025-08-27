@@ -1,13 +1,13 @@
 services:
   postgres_db:
     image: postgres:16
-    container_name: postgres_db
+    container_name: credit_db
     environment:
-        POSTGRES_DB: solicitudes_db
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: admin
+        POSTGRES_DB: ${DB_NAME:-solicitudes_db}
+        POSTGRES_USER: ${DB_USER:-postgres}
+        POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
     ports:
-        - "5440:5432"
+        - "${DB_PORT:-5432}:5432"
     volumes:
         - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +18,7 @@ services:
 
   flyway:
     image: flyway/flyway:9-alpine
-    container_name: flyway
+    container_name: credit_flyway
     depends_on:
       postgres_db:
         condition: service_healthy

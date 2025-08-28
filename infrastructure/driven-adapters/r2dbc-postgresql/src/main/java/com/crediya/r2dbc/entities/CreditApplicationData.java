@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,7 +26,7 @@ public class CreditApplicationData {
 	private Long idState;
 	
 	@Column("monto")
-	private String amount;
+	private BigDecimal amount;
 	
 	@Column("plazo")
 	private Integer term;

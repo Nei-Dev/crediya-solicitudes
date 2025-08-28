@@ -25,26 +25,23 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
     private final CreditApplicationRepository creditApplicationRepository;
     private final CreditTypeRepository creditTypeRepository;
     private final AuthService authService;
-
+    
     @Override
     public Mono<CreditApplication> execute(CreditApplication creditApplication) {
-        return Mono.just(creditApplication)
-                .flatMap(this::validateCreditApplication)
-                .flatMap(this::validateAmountRequested)
-                .flatMap(this::validateTermInMonths)
-                .flatMap(this::validateIdCreditType)
-                .flatMap(this::validateEmail)
-                .flatMap(this::validateCreditType)
-                .flatMap(this::validateIdentification)
-                .flatMap(this::setPendingState)
-                .flatMap(creditApplicationRepository::createApplication);
-    }
-
-    private Mono<CreditApplication> validateCreditApplication(CreditApplication creditApplication) {
-        if (creditApplication == null) {
-            return Mono.error(new InvalidCreditApplicationException(NULL_CREDIT_APPLICATION));
-        }
-        return Mono.just(creditApplication);
+        return Mono.defer(() -> {
+                if (creditApplication == null) {
+                    return Mono.error(new InvalidCreditApplicationException(NULL_CREDIT_APPLICATION));
+                }
+                return Mono.just(creditApplication);
+            })
+            .flatMap(this::validateAmountRequested)
+            .flatMap(this::validateTermInMonths)
+            .flatMap(this::validateIdCreditType)
+            .flatMap(this::validateEmail)
+            .flatMap(this::validateCreditType)
+            .flatMap(this::validateIdentification)
+            .flatMap(this::setPendingState)
+            .flatMap(creditApplicationRepository::createApplication);
     }
 
     private Mono<CreditApplication> validateAmountRequested(CreditApplication creditApplication) {
@@ -89,17 +86,16 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
                 return Mono.just(creditApplication);
             });
     }
-
+    
     private Mono<CreditApplication> validateCreditType(CreditApplication creditApplication) {
         return creditTypeRepository.findById(creditApplication.getIdCreditType())
-                .switchIfEmpty(Mono.error(new CreditTypeNotFoundException(CREDIT_TYPE_NOT_FOUND)))
-                .flatMap(creditType -> {
-                    if (creditApplication.getAmount().compareTo(creditType.getMinimumAmount()) <= 0 ||
-                            creditApplication.getAmount().compareTo(creditType.getMaximumAmount()) >= 0) {
-                        return Mono.error(new InvalidCreditApplicationException(AMOUNT_REQUESTED_NOT_WITHIN_LIMIT));
-                    }
-                    return Mono.just(creditApplication);
-                });
+            .switchIfEmpty(Mono.error(new CreditTypeNotFoundException(CREDIT_TYPE_NOT_FOUND)))
+            .flatMap(creditType -> {
+                if (creditApplication.getAmount().compareTo(creditType.getMinimumAmount()) <= 0 || creditApplication.getAmount().compareTo(creditType.getMaximumAmount()) >= 0) {
+                    return Mono.error(new InvalidCreditApplicationException(AMOUNT_REQUESTED_OUT_OF_RANGE));
+                }
+                return Mono.just(creditApplication);
+            });
     }
     
     private Mono<CreditApplication> setPendingState(CreditApplication creditApplication) {

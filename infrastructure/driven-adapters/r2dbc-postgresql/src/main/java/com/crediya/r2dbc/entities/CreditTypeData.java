@@ -23,10 +23,10 @@ public class CreditTypeData {
 	private String name;
 	
 	@Column("monto_minimo")
-	private BigDecimal minimunAmount;
+	private BigDecimal minimumAmount;
 	
 	@Column("monto_maximo")
-	private BigDecimal maximunAmount;
+	private BigDecimal maximumAmount;
 	
 	@Column("tasa_interes")
 	private BigDecimal interestRate;

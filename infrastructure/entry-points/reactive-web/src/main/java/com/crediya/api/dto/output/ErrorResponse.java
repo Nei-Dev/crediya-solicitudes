@@ -1,4 +1,4 @@
-package com.crediya.api.config.dto.output;
+package com.crediya.api.dto.output;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -4,9 +4,11 @@ import com.crediya.model.credittype.CreditType;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.r2dbc.mappers.CreditTypeEntityMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CreditTypeRepositoryAdapter implements CreditTypeRepository {
@@ -16,6 +18,7 @@ public class CreditTypeRepositoryAdapter implements CreditTypeRepository {
 	@Override
 	public Mono<CreditType> findById(Long idCreditType) {
 		return repository.findById(idCreditType)
+			.doOnSubscribe(subscription -> log.trace("Searching credit type in the database by id: {}", idCreditType))
 			.map(CreditTypeEntityMapper.INSTANCE::toEntity);
 	}
 }

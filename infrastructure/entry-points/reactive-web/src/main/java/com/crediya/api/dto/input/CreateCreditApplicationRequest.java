@@ -1,4 +1,4 @@
-package com.crediya.api.config.dto.input;
+package com.crediya.api.dto.input;
 
 import jakarta.validation.constraints.*;
 

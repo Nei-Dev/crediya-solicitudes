@@ -1,7 +1,7 @@
 package com.crediya.api;
 
-import com.crediya.api.config.dto.input.CreateCreditApplicationRequest;
-import com.crediya.api.config.dto.output.creditapplication.CreditApplicationApiResponse;
+import com.crediya.api.dto.input.CreateCreditApplicationRequest;
+import com.crediya.api.dto.output.creditapplication.CreditApplicationApiResponse;
 import com.crediya.api.mapper.CreditApplicationEntityMapper;
 import com.crediya.api.mapper.CreditApplicationResponseMapper;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;

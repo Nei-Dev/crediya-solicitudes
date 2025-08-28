@@ -4,7 +4,6 @@ import com.crediya.consumer.dto.input.user.UserResponse;
 import com.crediya.consumer.mapper.UserEntityMapper;
 import com.crediya.model.auth.User;
 import com.crediya.model.auth.gateways.AuthService;
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import static com.crediya.consumer.constants.Path.SEARCH_BY_IDENTIFICATION_PATH;
 public class AuthRestConsumer implements AuthService {
     
     private final WebClient client;
-    private final Gson gson = new Gson();
     
     @Override
     public Mono<User> findUserByIdentificationNumber(String identification) {
@@ -31,7 +29,7 @@ public class AuthRestConsumer implements AuthService {
             .retrieve()
             .bodyToMono(UserResponse.class)
             .doOnSubscribe(subscription -> log.trace("Starting call to Auth Service to find user by identification number: {}", identification))
-            .doOnNext(response -> log.debug("Received response from Auth Service for identification number {}: {}", identification, gson.toJson(response)))
+            .doOnNext(response -> log.debug("Received response from Auth Service for identification number {}: {}", identification, response))
             .map(UserEntityMapper.INSTANCE::toEntity)
             .onErrorResume(throwable -> throwable instanceof HttpClientErrorException.NotFound, throwable -> Mono.empty())
             .onErrorResume(WebClientResponseException.class::isInstance, throwable -> {

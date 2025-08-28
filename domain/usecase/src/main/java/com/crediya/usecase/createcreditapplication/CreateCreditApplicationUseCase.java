@@ -81,7 +81,7 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
             .switchIfEmpty(Mono.error(new UserNotFoundException(USER_NOT_FOUND)))
             .flatMap(user -> {
                 if (!user.getEmail().equals(creditApplication.getEmail())) {
-                    return Mono.error(new InvalidCreditApplicationException(INVALID_IDENTIFICATION));
+                    return Mono.error(new InvalidCreditApplicationException(USER_NOT_MATCH));
                 }
                 return Mono.just(creditApplication);
             });

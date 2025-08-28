@@ -152,11 +152,23 @@ class CreateCreditApplicationUseCaseTest {
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException
                 && e.getMessage().equals(INVALID_AMOUNT_REQUESTED))
             .verify();
+        
+        creditApplication.setAmount(null);
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException
+                && e.getMessage().equals(INVALID_AMOUNT_REQUESTED))
+            .verify();
     }
     
     @Test
     void execute_invalidTerm_shouldThrowException() {
         creditApplication.setTerm(0);
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException
+                && e.getMessage().equals(INVALID_TERM_IN_MONTHS))
+            .verify();
+        
+        creditApplication.setTerm(null);
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException
                 && e.getMessage().equals(INVALID_TERM_IN_MONTHS))
@@ -170,11 +182,25 @@ class CreateCreditApplicationUseCaseTest {
             .expectErrorMatches(e -> e instanceof InvalidCreditTypeException && e.getMessage().equals(INVALID_ID_CREDIT_TYPE))
             .verify();
         
+        creditApplication.setIdCreditType(0L);
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditTypeException && e.getMessage().equals(INVALID_ID_CREDIT_TYPE))
+            .verify();
     }
     
     @Test
     void execute_invalidEmail_shouldThrowException() {
         creditApplication.setEmail(null);
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_EMAIL))
+            .verify();
+        
+        creditApplication.setEmail("");
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_EMAIL))
+            .verify();
+        
+        creditApplication.setEmail("invalid-email");
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_EMAIL))
             .verify();
@@ -189,11 +215,35 @@ class CreateCreditApplicationUseCaseTest {
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(AMOUNT_REQUESTED_OUT_OF_RANGE))
             .verify();
+        
+        creditApplication.setAmount(BigDecimal.valueOf(100));
+        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
+            .thenReturn(Mono.just(creditTypeRegistered));
+        
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(AMOUNT_REQUESTED_OUT_OF_RANGE))
+            .verify();
     }
     
     @Test
     void execute_invalidIdentification_shouldThrowException() {
         creditApplication.setIdentification(null);
+        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
+            .thenReturn(Mono.just(creditTypeRegistered));
+        
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_IDENTIFICATION))
+            .verify();
+        
+        creditApplication.setIdentification("");
+        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
+            .thenReturn(Mono.just(creditTypeRegistered));
+        
+        StepVerifier.create(useCase.execute(creditApplication))
+            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_IDENTIFICATION))
+            .verify();
+        
+        creditApplication.setIdentification("invalid-id!");
         when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
             .thenReturn(Mono.just(creditTypeRegistered));
         

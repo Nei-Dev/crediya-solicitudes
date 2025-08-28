@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
@@ -54,6 +55,13 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(NotFoundException.class)
 	public Mono<ResponseEntity<ErrorResponse>> handleBindException(NotFoundException ex) {
 		ErrorResponse response = ErrorResponse.notFound(ex.getMessage());
+		return Mono.just(ResponseEntity.status(response.getCode()).contentType(MediaType.APPLICATION_JSON).body(response));
+	}
+	
+	@ExceptionHandler(NoResourceFoundException.class)
+	public Mono<ResponseEntity<ErrorResponse>> handleBindException(NoResourceFoundException ex) {
+		log.error("No resource found: {}", ex.getMessage());
+		ErrorResponse response = ErrorResponse.notFound("Resource not found");
 		return Mono.just(ResponseEntity.status(response.getCode()).contentType(MediaType.APPLICATION_JSON).body(response));
 	}
 	

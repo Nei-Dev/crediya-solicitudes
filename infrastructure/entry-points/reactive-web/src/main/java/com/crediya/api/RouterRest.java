@@ -5,8 +5,7 @@ import com.crediya.api.dto.output.ErrorResponse;
 import com.crediya.api.dto.output.creditapplication.CreditApplicationApiResponse;
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -78,7 +77,9 @@ public class RouterRest {
                                 .description(DESCRIPTION_NOT_FOUND)
                                 .content(new Content()
                                     .addMediaType(MediaType.APPLICATION_JSON_VALUE, new io.swagger.v3.oas.models.media.MediaType()
-                                        .schema(new Schema<ErrorResponse>())))))
+                                        .schema(new ObjectSchema()
+                                            .addProperty("message", new StringSchema().description("Error message"))
+                                            .addProperty("code", new NumberSchema().description("Error codigo")))))))
                     )));
     }
     

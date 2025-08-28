@@ -1,7 +1,6 @@
 package com.crediya.r2dbc.creditapplication;
 
 import com.crediya.model.creditapplication.CreditApplication;
-import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.exceptions.StateNotFoundException;

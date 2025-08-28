@@ -17,6 +17,7 @@ public class CreditApplication {
 	private BigDecimal amount;
 	private Integer term;
 	private String email;
+	private String identification;
 	private Long idCreditType;
 	private StateCreditApplication state;
 	

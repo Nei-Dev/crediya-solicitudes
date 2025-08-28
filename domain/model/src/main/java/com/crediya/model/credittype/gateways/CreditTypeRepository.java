@@ -1,9 +1,10 @@
 package com.crediya.model.credittype.gateways;
 
+import com.crediya.model.credittype.CreditType;
 import reactor.core.publisher.Mono;
 
 public interface CreditTypeRepository {
 	
-	Mono<Boolean> existsByIdCreditType(Long idCreditType);
+	Mono<CreditType> findById(Long idCreditType);
 	
 }

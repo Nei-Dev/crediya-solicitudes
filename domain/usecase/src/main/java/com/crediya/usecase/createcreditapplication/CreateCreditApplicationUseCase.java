@@ -1,12 +1,14 @@
 package com.crediya.usecase.createcreditapplication;
 
+import com.crediya.model.auth.gateways.AuthService;
 import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.creditapplication.ports.ICreateCreditApplicationUseCase;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
-import com.crediya.model.exceptions.BusinessException;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
+import com.crediya.model.exceptions.credittype.CreditTypeNotFoundException;
 import com.crediya.model.exceptions.credittype.InvalidCreditTypeException;
+import com.crediya.model.exceptions.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -14,69 +16,94 @@ import java.math.BigDecimal;
 
 import static com.crediya.model.constants.ErrorMessage.*;
 import static com.crediya.model.constants.Regex.EMAIL;
+import static com.crediya.model.constants.Regex.IDENTIFICATION;
 import static com.crediya.model.creditapplication.StateCreditApplication.PENDING;
 
 @RequiredArgsConstructor
 public class CreateCreditApplicationUseCase implements ICreateCreditApplicationUseCase {
+
+    private final CreditApplicationRepository creditApplicationRepository;
+    private final CreditTypeRepository creditTypeRepository;
+    private final AuthService authService;
+
+    @Override
+    public Mono<CreditApplication> execute(CreditApplication creditApplication) {
+        return Mono.just(creditApplication)
+                .flatMap(this::validateCreditApplication)
+                .flatMap(this::validateAmountRequested)
+                .flatMap(this::validateTermInMonths)
+                .flatMap(this::validateIdCreditType)
+                .flatMap(this::validateEmail)
+                .flatMap(this::validateCreditType)
+                .flatMap(this::validateIdentification)
+                .flatMap(this::setPendingState)
+                .flatMap(creditApplicationRepository::createApplication);
+    }
+
+    private Mono<CreditApplication> validateCreditApplication(CreditApplication creditApplication) {
+        if (creditApplication == null) {
+            return Mono.error(new InvalidCreditApplicationException(NULL_CREDIT_APPLICATION));
+        }
+        return Mono.just(creditApplication);
+    }
+
+    private Mono<CreditApplication> validateAmountRequested(CreditApplication creditApplication) {
+        if (creditApplication.getAmount() == null || creditApplication.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return Mono.error(new InvalidCreditApplicationException(INVALID_AMOUNT_REQUESTED));
+        }
+        return Mono.just(creditApplication);
+    }
+
+    private Mono<CreditApplication> validateTermInMonths(CreditApplication creditApplication) {
+        if (creditApplication.getTerm() == null || creditApplication.getTerm() <= 0) {
+            return Mono.error(new InvalidCreditApplicationException(INVALID_TERM_IN_MONTHS));
+        }
+        return Mono.just(creditApplication);
+    }
 	
-	private final CreditApplicationRepository creditApplicationRepository;
-	private final CreditTypeRepository creditTypeRepository;
-	
-	@Override
-	public Mono<CreditApplication> execute(CreditApplication creditApplication) {
-		try {
-			validateCreditApplication(creditApplication);
-		} catch (BusinessException e) {
-			return Mono.error(e);
+	private Mono<CreditApplication> validateIdCreditType(CreditApplication creditApplication) {
+		if (creditApplication.getIdCreditType() == null || creditApplication.getIdCreditType() <= 0) {
+			return Mono.error(new InvalidCreditTypeException(INVALID_ID_CREDIT_TYPE));
 		}
-		
-		creditApplication.setState(PENDING);
-		
-		return creditTypeRepository.existsByIdCreditType(creditApplication.getIdCreditType())
-			.flatMap(exists -> {
-				if (Boolean.FALSE.equals(exists)) {
-					return Mono.error(new InvalidCreditTypeException(CREDIT_TYPE_NOT_FOUND));
-				}
-				return creditApplicationRepository.createApplication(creditApplication);
-			});
+		return Mono.just(creditApplication);
 	}
-	
-	private void validateCreditApplication(CreditApplication creditApplication) {
-		if (creditApplication == null) {
-			throw new InvalidCreditApplicationException(NULL_CREDIT_APPLICATION);
-		}
-		
-		validateAmountRequested(creditApplication.getAmount());
-		validateTermInMonths(creditApplication.getTerm());
-		validateIdCreditType(creditApplication.getIdCreditType());
-		validateEmail(creditApplication.getEmail());
-	}
-	
-	private void validateAmountRequested(BigDecimal amountRequested) {
-		if (amountRequested == null || amountRequested.compareTo(BigDecimal.ZERO) <= 0) {
-			throw new InvalidCreditApplicationException(INVALID_AMOUNT_REQUESTED);
-		}
-	}
-	
-	private void validateTermInMonths(Integer termInMonths) {
-		if (termInMonths == null || termInMonths <= 0) {
-			throw new InvalidCreditApplicationException(INVALID_TERM_IN_MONTHS);
-		}
-	}
-	
-	private void validateIdCreditType(Long idCreditType) {
-		if (idCreditType == null || idCreditType <= 0) {
-			throw new InvalidCreditTypeException(INVALID_ID_CREDIT_TYPE);
-		}
-	}
-	
-	private void validateEmail(String email) {
-		if (email == null || email.trim().isEmpty()) {
-			throw new InvalidCreditApplicationException(INVALID_EMAIL);
-		}
-		if(!email.matches(EMAIL)) {
-			throw new InvalidCreditApplicationException(INVALID_EMAIL);
-		}
-	}
-	
+
+    private Mono<CreditApplication> validateEmail(CreditApplication creditApplication) {
+        if (creditApplication.getEmail() == null || creditApplication.getEmail().trim().isEmpty() || !creditApplication.getEmail().matches(EMAIL)) {
+            return Mono.error(new InvalidCreditApplicationException(INVALID_EMAIL));
+        }
+        
+        return Mono.just(creditApplication);
+    }
+    
+    private Mono<CreditApplication> validateIdentification(CreditApplication creditApplication) {
+        if (creditApplication.getIdentification() == null || creditApplication.getIdentification().trim().isEmpty() || !creditApplication.getIdentification().matches(IDENTIFICATION)) {
+            return Mono.error(new InvalidCreditApplicationException(INVALID_IDENTIFICATION));
+        }
+        return authService.findUserByIdentificationNumber(creditApplication.getIdentification())
+            .switchIfEmpty(Mono.error(new UserNotFoundException(USER_NOT_FOUND)))
+            .flatMap(user -> {
+                if (!user.getEmail().equals(creditApplication.getEmail())) {
+                    return Mono.error(new InvalidCreditApplicationException(INVALID_IDENTIFICATION));
+                }
+                return Mono.just(creditApplication);
+            });
+    }
+
+    private Mono<CreditApplication> validateCreditType(CreditApplication creditApplication) {
+        return creditTypeRepository.findById(creditApplication.getIdCreditType())
+                .switchIfEmpty(Mono.error(new CreditTypeNotFoundException(CREDIT_TYPE_NOT_FOUND)))
+                .flatMap(creditType -> {
+                    if (creditApplication.getAmount().compareTo(creditType.getMinimumAmount()) <= 0 ||
+                            creditApplication.getAmount().compareTo(creditType.getMaximumAmount()) >= 0) {
+                        return Mono.error(new InvalidCreditApplicationException(AMOUNT_REQUESTED_NOT_WITHIN_LIMIT));
+                    }
+                    return Mono.just(creditApplication);
+                });
+    }
+    
+    private Mono<CreditApplication> setPendingState(CreditApplication creditApplication) {
+        creditApplication.setState(PENDING);
+        return Mono.just(creditApplication);
+    }
 }

@@ -79,23 +79,18 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
         }
         return authService.findUserByIdentificationNumber(creditApplication.getIdentification())
             .switchIfEmpty(Mono.error(new UserNotFoundException(USER_NOT_FOUND)))
-            .flatMap(user -> {
-                if (!user.getEmail().equals(creditApplication.getEmail())) {
-                    return Mono.error(new InvalidCreditApplicationException(USER_NOT_MATCH));
-                }
-                return Mono.just(creditApplication);
-            });
+            .filter(user -> user.getEmail() != null && user.getEmail().equals(creditApplication.getEmail()))
+            .switchIfEmpty(Mono.error(new InvalidCreditApplicationException(USER_NOT_MATCH)))
+            .thenReturn(creditApplication);
     }
     
     private Mono<CreditApplication> validateCreditType(CreditApplication creditApplication) {
         return creditTypeRepository.findById(creditApplication.getIdCreditType())
             .switchIfEmpty(Mono.error(new CreditTypeNotFoundException(CREDIT_TYPE_NOT_FOUND)))
-            .flatMap(creditType -> {
-                if (creditApplication.getAmount().compareTo(creditType.getMinimumAmount()) <= 0 || creditApplication.getAmount().compareTo(creditType.getMaximumAmount()) >= 0) {
-                    return Mono.error(new InvalidCreditApplicationException(AMOUNT_REQUESTED_OUT_OF_RANGE));
-                }
-                return Mono.just(creditApplication);
-            });
+            .filter(creditType -> creditApplication.getAmount().compareTo(creditType.getMinimumAmount()) > 0
+                && creditApplication.getAmount().compareTo(creditType.getMaximumAmount()) < 0)
+            .switchIfEmpty(Mono.error(new InvalidCreditApplicationException(AMOUNT_REQUESTED_OUT_OF_RANGE)))
+            .thenReturn(creditApplication);
     }
     
     private Mono<CreditApplication> setPendingState(CreditApplication creditApplication) {

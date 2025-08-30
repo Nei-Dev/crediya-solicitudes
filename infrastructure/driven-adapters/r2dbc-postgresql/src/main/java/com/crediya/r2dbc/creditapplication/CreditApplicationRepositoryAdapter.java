@@ -32,6 +32,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 		return transactionalOperator.transactional(
 			stateRepository.findByName(state)
 				.doOnSubscribe(subscription -> log.trace("Searching state in the database: {}", state))
+				.doOnSuccess(stateRegistered -> log.info("State found in the database: {}", stateRegistered.getName()))
 				.switchIfEmpty(Mono.error(new StateNotFoundException(STATE_NOT_FOUND)))
 				.flatMap(stateData -> {
 					dataToSave.setIdState(stateData.getId());

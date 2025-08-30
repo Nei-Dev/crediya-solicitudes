@@ -129,7 +129,7 @@ class CreateCreditApplicationUseCaseTest {
         
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException
-                && e.getMessage().equals(INVALID_IDENTIFICATION))
+                && e.getMessage().equals(USER_NOT_MATCH))
             .verify();
     }
 

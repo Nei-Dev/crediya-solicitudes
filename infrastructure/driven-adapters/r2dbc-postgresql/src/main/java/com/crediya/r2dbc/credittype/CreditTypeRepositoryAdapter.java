@@ -19,6 +19,7 @@ public class CreditTypeRepositoryAdapter implements CreditTypeRepository {
 	public Mono<CreditType> findById(Long idCreditType) {
 		return repository.findById(idCreditType)
 			.doOnSubscribe(subscription -> log.trace("Searching credit type in the database by id: {}", idCreditType))
+			.doOnSuccess(data -> log.info("Credit type found in the database: {}", data.getName()))
 			.map(CreditTypeEntityMapper.INSTANCE::toEntity);
 	}
 }

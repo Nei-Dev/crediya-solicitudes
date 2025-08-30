@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.resource.NoResourceFoundException;
@@ -53,8 +53,9 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 			ErrorResponse.notFound("Resource not found"));
 	}
 
+	@NonNull
 	@Override
-	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
+	public Mono<Void> handle(ServerWebExchange exchange, @NonNull Throwable ex) {
 		ErrorResponse response = handlers.entrySet().stream()
 			.filter(e -> e.getKey().isAssignableFrom(ex.getClass()))
 			.findFirst()

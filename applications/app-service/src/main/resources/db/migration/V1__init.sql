@@ -1,26 +1,26 @@
-CREATE TABLE estado
+CREATE TABLE state
 (
-    id_estado   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nombre      VARCHAR(50) NOT NULL UNIQUE,
-    descripcion VARCHAR(255)
+    id_state    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name        VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(255)
 );
 
-CREATE TABLE tipo_prestamo
+CREATE TABLE credit_type
 (
-    id_tipo_prestamo      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nombre                VARCHAR(50) NOT NULL UNIQUE,
-    monto_minimo          NUMERIC     NOT NULL,
-    monto_maximo          NUMERIC     NOT NULL,
-    tasa_interes          NUMERIC     NOT NULL,
-    validacion_automatica BOOLEAN     NOT NULL DEFAULT FALSE
+    id_credit_type  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name            VARCHAR(50) NOT NULL UNIQUE,
+    minimum_amount  NUMERIC     NOT NULL,
+    maximum_amount  NUMERIC     NOT NULL,
+    interest_rate   NUMERIC     NOT NULL,
+    auto_validation BOOLEAN     NOT NULL DEFAULT FALSE
 );
 
-CREATE TABLE solicitud
+CREATE TABLE application
 (
-    id_solicitud     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    monto            NUMERIC                                            NOT NULL,
-    plazo            INTEGER                                            NOT NULL,
-    email            VARCHAR(150)                                       NOT NULL,
-    id_tipo_prestamo BIGINT REFERENCES tipo_prestamo (id_tipo_prestamo) NOT NULL,
-    id_estado        BIGINT REFERENCES estado (id_estado)               NOT NULL
+    id_application BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    amount         NUMERIC                                        NOT NULL,
+    term           INTEGER                                        NOT NULL,
+    email          VARCHAR(150)                                   NOT NULL,
+    id_credit_type BIGINT REFERENCES credit_type (id_credit_type) NOT NULL,
+    id_state       BIGINT REFERENCES state (id_state)             NOT NULL
 );

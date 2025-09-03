@@ -56,3 +56,8 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
+app:
+  paths:
+    credit-application:
+      createApplication: /api/v1/credit-application
+      listCreditApplication: /api/v1/credit-application

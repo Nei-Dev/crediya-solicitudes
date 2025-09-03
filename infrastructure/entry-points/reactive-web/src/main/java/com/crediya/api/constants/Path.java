@@ -1,10 +1,15 @@
 package com.crediya.api.constants;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@Getter
+@Setter
+@ConfigurationProperties(prefix = "app.paths.credit-application")
 public class Path {
 	
-	private Path() {}
+	private String createApplication;
+	private String listCreditApplication;
 	
-	public static final String BASE_PATH = "/api/v1";
-	
-	public static final String APPLICATION_PATH = BASE_PATH + "/solicitud";
 }

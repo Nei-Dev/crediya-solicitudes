@@ -1,6 +1,5 @@
 package com.crediya.api.config;
 
-import com.crediya.model.auth.gateways.AuthService;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.usecase.createcreditapplication.CreateCreditApplicationUseCase;
@@ -13,9 +12,8 @@ public class UseCaseConfig {
 	@Bean
 	public CreateCreditApplicationUseCase createCreditApplicationUseCase(
 		CreditApplicationRepository creditApplicationRepository,
-		CreditTypeRepository creditTypeRepository,
-		AuthService authService
+		CreditTypeRepository creditTypeRepository
 	) {
-		return new CreateCreditApplicationUseCase(creditApplicationRepository, creditTypeRepository, authService);
+		return new CreateCreditApplicationUseCase(creditApplicationRepository, creditTypeRepository);
 	}
 }

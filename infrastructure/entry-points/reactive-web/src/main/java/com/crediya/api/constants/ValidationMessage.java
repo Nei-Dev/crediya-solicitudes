@@ -11,6 +11,7 @@ public final class ValidationMessage {
     public static final String EMAIL_NOT_BLANK = "Email cannot be blank";
     public static final String EMAIL_FORMAT = "Email must have a valid format";
     public static final String IDENTIFICATION_NOT_BLANK = "Identification is required and cannot be blank";
+    public static final String IDENTIFICATION_NOT_LARGER_THAN_20 = "Identification cannot be longer than 20 characters";
     public static final String INVALID_IDENTIFICATION = "Identification is invalid";
     public static final String CREDIT_TYPE_ID_NOT_NULL = "Credit type ID cannot be null";
     public static final String CREDIT_TYPE_ID_POSITIVE = "Credit type ID must be a positive number";

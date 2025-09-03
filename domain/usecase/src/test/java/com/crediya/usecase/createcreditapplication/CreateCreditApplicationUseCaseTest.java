@@ -1,7 +1,5 @@
 package com.crediya.usecase.createcreditapplication;
 
-import com.crediya.model.auth.User;
-import com.crediya.model.auth.gateways.AuthService;
 import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.credittype.CreditType;
@@ -9,7 +7,6 @@ import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.exceptions.credittype.CreditTypeNotFoundException;
 import com.crediya.model.exceptions.credittype.InvalidCreditTypeException;
-import com.crediya.model.exceptions.user.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,15 +34,10 @@ class CreateCreditApplicationUseCaseTest {
 
     @Mock
     private CreditTypeRepository creditTypeRepository;
-
-    @Mock
-    private AuthService authService;
     
     private CreditApplication creditApplication;
     
     private CreditType creditTypeRegistered;
-    
-    private User userRegistered;
     
     @BeforeEach
     void setUp() {
@@ -64,12 +56,6 @@ class CreateCreditApplicationUseCaseTest {
             .minimumAmount(BigDecimal.valueOf(500))
             .maximumAmount(BigDecimal.valueOf(5000))
             .build();
-        
-        userRegistered = User.builder()
-            .id(1L)
-            .identification("123456789")
-            .email("test@example.com")
-            .build();
     }
     
     @Test
@@ -83,8 +69,6 @@ class CreateCreditApplicationUseCaseTest {
             .email("test@example.com")
             .build();
 
-        when(authService.findUserByIdentificationNumber(any(String.class)))
-                .thenReturn(Mono.just(userRegistered));
         when(creditTypeRepository.findById(any(Long.class)))
                 .thenReturn(Mono.just(creditTypeRegistered));
         when(creditApplicationRepository.createApplication(any(CreditApplication.class)))
@@ -104,32 +88,6 @@ class CreateCreditApplicationUseCaseTest {
     void execute_nullCreditApplication_shouldThrowException() {
         StepVerifier.create(useCase.execute(null))
             .expectError(InvalidCreditApplicationException.class)
-            .verify();
-    }
-
-    @Test
-    void execute_userNotFound_shouldThrowException() {
-        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
-            .thenReturn(Mono.just(creditTypeRegistered));
-        when(authService.findUserByIdentificationNumber(any(String.class)))
-            .thenReturn(Mono.empty());
-        
-        StepVerifier.create(useCase.execute(creditApplication))
-            .expectError(UserNotFoundException.class)
-            .verify();
-    }
-    
-    @Test
-    void execute_userNotSameEmail_shouldThrowException() {
-        creditApplication.setEmail("other@example.com");
-        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
-            .thenReturn(Mono.just(creditTypeRegistered));
-        when(authService.findUserByIdentificationNumber(creditApplication.getIdentification()))
-            .thenReturn(Mono.just(userRegistered));
-        
-        StepVerifier.create(useCase.execute(creditApplication))
-            .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException
-                && e.getMessage().equals(USER_NOT_MATCH))
             .verify();
     }
 
@@ -228,25 +186,16 @@ class CreateCreditApplicationUseCaseTest {
     @Test
     void execute_invalidIdentification_shouldThrowException() {
         creditApplication.setIdentification(null);
-        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
-            .thenReturn(Mono.just(creditTypeRegistered));
-        
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_IDENTIFICATION))
             .verify();
         
         creditApplication.setIdentification("");
-        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
-            .thenReturn(Mono.just(creditTypeRegistered));
-        
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_IDENTIFICATION))
             .verify();
         
         creditApplication.setIdentification("invalid-id!");
-        when(creditTypeRepository.findById(creditApplication.getIdCreditType()))
-            .thenReturn(Mono.just(creditTypeRegistered));
-        
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_IDENTIFICATION))
             .verify();

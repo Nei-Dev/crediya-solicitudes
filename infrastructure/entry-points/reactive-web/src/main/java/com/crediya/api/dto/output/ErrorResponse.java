@@ -27,4 +27,12 @@ public class ErrorResponse {
 	public static ErrorResponse internalServerError(String message) {
 		return new ErrorResponse(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
 	}
+	
+	public static ErrorResponse forbidden(String message) {
+		return new ErrorResponse(message, HttpStatus.FORBIDDEN.value());
+	}
+	
+	public static ErrorResponse unauthorized(String message) {
+		return new ErrorResponse(message, HttpStatus.UNAUTHORIZED.value());
+	}
 }

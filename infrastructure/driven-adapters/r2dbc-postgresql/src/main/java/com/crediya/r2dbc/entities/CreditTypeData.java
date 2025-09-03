@@ -12,25 +12,25 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Table(name = "tipo_prestamo")
+@Table(name = "credit_type")
 public class CreditTypeData {
 	
 	@Id
-	@Column("id_tipo_prestamo")
+	@Column("id_credit_type")
 	private Long id;
 	
-	@Column("nombre")
+	@Column("name")
 	private String name;
 	
-	@Column("monto_minimo")
+	@Column("minimum_amount")
 	private BigDecimal minimumAmount;
 	
-	@Column("monto_maximo")
+	@Column("maximum_amount")
 	private BigDecimal maximumAmount;
 	
-	@Column("tasa_interes")
+	@Column("interest_rate")
 	private BigDecimal interestRate;
 	
-	@Column("validacion_automatica")
+	@Column("auto_validation")
 	private Boolean autoValidation;
 }

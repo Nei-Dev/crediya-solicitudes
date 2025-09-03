@@ -1,11 +1,11 @@
 package com.crediya.r2dbc.creditapplication;
 
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.exceptions.StateNotFoundException;
 import com.crediya.r2dbc.mappers.CreditApplicationEntityMapper;
-import com.crediya.r2dbc.mappers.StateCreditApplicationMapper;
 import com.crediya.r2dbc.statecreditapplication.StateCreditApplicationReactiveRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	@Override
 	public Mono<CreditApplication> createApplication(CreditApplication creditApplication) {
 		CreditApplicationData dataToSave = CreditApplicationEntityMapper.INSTANCE.toData(creditApplication);
-		String state = StateCreditApplicationMapper.toDatabase(creditApplication.getState());
+		String state = creditApplication.getState().name();
 		
 		return transactionalOperator.transactional(
 			stateRepository.findByName(state)
@@ -51,7 +51,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 			.switchIfEmpty(Mono.error(new StateNotFoundException(STATE_NOT_FOUND)))
 			.map(stateData -> {
 				CreditApplication entity = CreditApplicationEntityMapper.INSTANCE.toEntity(data);
-				entity.setState(StateCreditApplicationMapper.fromDatabase(stateData.getName()));
+				entity.setState(StateCreditApplication.valueOf(stateData.getName()));
 				return entity;
 			});
 	}

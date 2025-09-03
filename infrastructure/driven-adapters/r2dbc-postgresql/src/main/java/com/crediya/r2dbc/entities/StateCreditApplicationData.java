@@ -10,17 +10,17 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Table(name = "estado")
+@Table(name = "state")
 public class StateCreditApplicationData {
 
 	@Id
-	@Column("id_estado")
+	@Column("id_state")
 	private Long id;
 	
-	@Column("nombre")
+	@Column("name")
 	private String name;
 	
-	@Column("descripcion")
+	@Column("description")
 	private String description;
 	
 }

@@ -12,23 +12,23 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Table(name = "solicitud")
+@Table(name = "application")
 public class CreditApplicationData {
 	
 	@Id
-	@Column("id_solicitud")
+	@Column("id_application")
 	private Long idApplication;
 	
-	@Column("id_tipo_prestamo")
+	@Column("id_credit_type")
 	private Long idCreditType;
 	
-	@Column("id_estado")
+	@Column("id_state")
 	private Long idState;
 	
-	@Column("monto")
+	@Column("amount")
 	private BigDecimal amount;
 	
-	@Column("plazo")
+	@Column("term")
 	private Integer term;
 	
 	@Column("email")

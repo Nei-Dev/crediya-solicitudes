@@ -1,6 +1,6 @@
 package com.crediya.api.dto.output.creditapplication;
 
-import com.crediya.api.dto.output.ApiResponseDTO;
+import com.crediya.api.dto.output.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CreditApplicationApiResponse extends ApiResponseDTO<CreditApplicationResponse> {
+public class CreditApplicationApiResponse extends ApiResponse<CreditApplicationResponse> {
 	
 	public CreditApplicationApiResponse(CreditApplicationResponse data, String message) {
 		super(data, message);

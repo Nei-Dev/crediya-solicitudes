@@ -338,3 +338,5 @@ build-cache
 /postgres_data
 
 .env
+
+.github/

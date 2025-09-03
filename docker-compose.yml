@@ -22,6 +22,6 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
-    command: -url=jdbc:postgresql://postgres_db:5432/applications_db -user=postgres -password=admin -schemas=public -connectRetries=20 migrate
+    command: -url=jdbc:postgresql://postgres_db:5432/${DB_NAME} -user=${DB_USER} -password=${DB_PASSWORD} -schemas=public -connectRetries=20 migrate
     volumes:
       - ./applications/app-service/src/main/resources/db/migration:/flyway/sql/migration

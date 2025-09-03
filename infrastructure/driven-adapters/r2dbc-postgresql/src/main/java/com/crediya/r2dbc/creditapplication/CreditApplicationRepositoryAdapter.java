@@ -37,7 +37,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				.flatMap(stateData -> {
 					dataToSave.setIdState(stateData.getId());
 					return creditApplicationRepository.save(dataToSave)
-						.doOnSubscribe(subscription -> log.trace("Creating credit application in the database: {}", dataToSave.getIdApplication()));
+						.doOnSubscribe(subscription -> log.trace("Creating credit application in the database"));
 				})
 				.flatMap(this::mapToEntity)
 		);

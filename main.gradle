@@ -89,11 +89,27 @@ jacoco {
 }
 
 tasks.register('jacocoMergedReport', JacocoReport) {
-    dependsOn = [test, subprojects.jacocoTestReport, pitestReportAggregate]
-    additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom files(subprojects.sourceSets.main.output)
-    executionData.setFrom project.fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+    def usecaseSrcDirs = project(':usecase').sourceSets.main.allSource.srcDirs
+    def modelSrcDirs = project(':model').sourceSets.main.allSource.srcDirs
+    def allSrcDirs = [] + usecaseSrcDirs + modelSrcDirs
+
+    dependsOn = [
+            project(':usecase').tasks.jacocoTestReport,
+            project(':model').tasks.jacocoTestReport,
+            pitestReportAggregate
+    ]
+    additionalSourceDirs.setFrom files(allSrcDirs)
+    sourceDirectories.setFrom files(allSrcDirs)
+    classDirectories.setFrom files(
+            project(':usecase').sourceSets.main.output,
+            project(':model').sourceSets.main.output
+    ).asFileTree.matching {
+        exclude '**/*Exception.class'
+    }
+    executionData.setFrom files(
+            project(':usecase').layout.buildDirectory.file('jacoco/test.exec').get().asFile,
+            project(':model').layout.buildDirectory.file('jacoco/test.exec').get().asFile
+    )
     reports {
         xml.setRequired true
         csv.setRequired false

@@ -34,4 +34,10 @@ public class CreditApplicationData {
 	@Column("email")
 	private String email;
 	
+	@Column("client_name")
+	private String clientName;
+	
+	@Column("client_salary_base")
+	private BigDecimal clientSalaryBase;
+	
 }

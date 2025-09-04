@@ -2,6 +2,7 @@ package com.crediya.api.config;
 
 import com.crediya.api.constants.Path;
 import com.crediya.api.dto.output.ErrorResponse;
+import com.crediya.api.filters.CorrelationWebFilter;
 import com.crediya.api.helpers.DefaultResponseHelper;
 import com.crediya.model.auth.UserRole;
 import com.crediya.model.auth.gateways.TokenService;
@@ -37,7 +38,7 @@ import static org.springframework.http.HttpMethod.POST;
 @EnableWebFluxSecurity
 @RequiredArgsConstructor
 @EnableReactiveMethodSecurity
-public class SecurityFilter implements WebFluxConfigurer {
+public class SecurityFilterConfig implements WebFluxConfigurer {
     
     private static final String BEARER = "Bearer ";
     private static final String ROLE_PREFIX = "ROLE_";
@@ -55,7 +56,7 @@ public class SecurityFilter implements WebFluxConfigurer {
     @Bean
     public SecurityWebFilterChain filterChain(
         ServerHttpSecurity http,
-        AuthenticationWebFilter jwtAuthFilter
+        AuthenticationWebFilter jwtAuthFilter, CorrelationWebFilter correlationWebFilter
     ) {
         http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
@@ -63,14 +64,14 @@ public class SecurityFilter implements WebFluxConfigurer {
             .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
             .authorizeExchange(authorize -> authorize
                 .pathMatchers(ALLOWED_PATHS_SWAGGER).permitAll()
-                .pathMatchers(POST, path.getCreateApplication()).hasAnyRole(UserRole.CLIENT.name())
-//                .pathMatchers(GET, path.getListCreditApplication()).hasAnyRole(UserRole.MANAGER.name())
+                .pathMatchers(POST, path.getCreateApplication()).hasRole(UserRole.CLIENT.name())
                 .anyExchange().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(this::handleSecurityException)
                 .accessDeniedHandler(this::handleAccessDenied)
             )
+            .addFilterAt(correlationWebFilter, SecurityWebFiltersOrder.FIRST)
             .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         return http.build();
     }

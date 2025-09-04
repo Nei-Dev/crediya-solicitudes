@@ -14,9 +14,10 @@ adapters:
     username: "${DB_USER:postgres}"
     password: "${DB_PASSWORD:postgres}"
 logging:
+#  pattern:
+#    level: "%5p [correlationId=%X{correlationId}]"
   level:
-    com:
-      crediya: "${LOG_LEVEL:INFO}"
+    com.crediya: "${LOG_LEVEL:INFO}"
 management:
   endpoints:
     web:
@@ -35,6 +36,8 @@ adapter:
   restconsumer:
     timeout: 5000
     url: "${AUTH_URL:http://localhost:8080/api}"
+    path:
+      me: /v1/auth/me
 resilience4j:
   circuitbreaker:
     instances:

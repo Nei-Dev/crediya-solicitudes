@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<springProperty name="appName" source="spring.application.name" defaultValue="crediya-app"/>
+
+	<property name="LOG_PATTERN_ROOT" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n"/>
+	<property name="LOG_PATTERN_CREDIYA" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{40} %mdc{correlationId:-} %msg%n"/>
+
+	<appender name="CONSOLE_CREDIYA" class="ch.qos.logback.core.ConsoleAppender">
+		<withJansi>true</withJansi>
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="ch.qos.logback.classic.PatternLayout">
+				<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{40} %replace(%X{correlationId}){'^(.+)$','[correlationId=$1] '} - %msg%n</pattern>
+			</layout>
+		</encoder>
+	</appender>
+
+	<appender name="CONSOLE_ROOT" class="ch.qos.logback.core.ConsoleAppender">
+		<withJansi>true</withJansi>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{40} %replace(%X{correlationId}){'^(.+)$','[correlationId=$1] '} - %msg%n</pattern>
+			<charset>utf8</charset>
+		</encoder>
+	</appender>
+
+	<logger name="com.crediya" level="TRACE" additivity="false">
+		<appender-ref ref="CONSOLE_CREDIYA"/>
+	</logger>
+
+	<root level="INFO">
+		<appender-ref ref="CONSOLE_ROOT"/>
+	</root>
+</configuration>

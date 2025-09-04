@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface AuthService {
 	
-	Mono<User> findUserByIdentificationNumber(String email);
+	Mono<User> findUserByToken(String token);
 	
 }

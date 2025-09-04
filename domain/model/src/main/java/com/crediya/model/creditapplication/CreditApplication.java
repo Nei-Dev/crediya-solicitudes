@@ -20,5 +20,7 @@ public class CreditApplication {
 	private String identification;
 	private Long idCreditType;
 	private StateCreditApplication state;
+	private String clientName;
+	private BigDecimal clientSalaryBase;
 	
 }

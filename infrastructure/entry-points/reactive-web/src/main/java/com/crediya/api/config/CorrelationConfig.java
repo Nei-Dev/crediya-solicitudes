@@ -10,7 +10,7 @@ import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Operators;
 import reactor.util.context.Context;
 
-import static com.crediya.api.config.CorrelationConstants.CORRELATION_ID_KEY;
+import static com.crediya.api.constants.CorrelationConstants.CORRELATION_ID_KEY;
 
 @Configuration
 public class CorrelationConfig {

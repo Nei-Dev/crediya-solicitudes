@@ -26,6 +26,7 @@ public class AuthRestConsumer implements AuthService {
         return client
             .get()
             .uri(authPath.getMe())
+            .header(org.springframework.http.HttpHeaders.AUTHORIZATION, "Bearer ".concat(token))
             .retrieve()
             .bodyToMono(UserResponse.class)
             .doOnSubscribe(subscription -> log.trace("Starting call to Auth Service to find user by token"))
@@ -34,6 +35,10 @@ public class AuthRestConsumer implements AuthService {
             .onErrorResume(throwable -> throwable instanceof HttpClientErrorException.NotFound, throwable -> Mono.empty())
             .onErrorResume(WebClientResponseException.class::isInstance, throwable -> {
                 log.error("Error occurred while calling Auth Service: {}", throwable.getMessage());
+                return Mono.empty();
+            })
+            .onErrorResume(org.springframework.web.reactive.function.client.WebClientRequestException.class::isInstance, throwable -> {
+                log.error("Auth Service is unreachable: {}", throwable.getMessage());
                 return Mono.empty();
             });
     }

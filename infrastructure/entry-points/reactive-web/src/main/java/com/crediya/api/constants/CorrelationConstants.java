@@ -1,4 +1,4 @@
-package com.crediya.api.config;
+package com.crediya.api.constants;
 
 import lombok.experimental.UtilityClass;
 

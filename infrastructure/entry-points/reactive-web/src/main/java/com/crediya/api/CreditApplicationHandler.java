@@ -37,6 +37,7 @@ public class CreditApplicationHandler {
 			.flatMap(app -> serverRequest.principal()
 				.cast(UsernamePasswordAuthenticationToken.class)
 				.map(auth -> ( String ) auth.getCredentials())
+				.log()
 				.flatMap(authUseCase::getUserByToken)
 				.flatMap(user -> enrichWithUserData(app, user))
 				.flatMap(createCreditApplicationUseCase::execute)

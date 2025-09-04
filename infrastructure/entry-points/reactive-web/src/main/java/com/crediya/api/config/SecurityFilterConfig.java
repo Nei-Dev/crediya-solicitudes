@@ -56,7 +56,8 @@ public class SecurityFilterConfig implements WebFluxConfigurer {
     @Bean
     public SecurityWebFilterChain filterChain(
         ServerHttpSecurity http,
-        AuthenticationWebFilter jwtAuthFilter, CorrelationWebFilter correlationWebFilter
+        AuthenticationWebFilter jwtAuthFilter,
+        CorrelationWebFilter correlationWebFilter
     ) {
         http
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
@@ -103,7 +104,7 @@ public class SecurityFilterConfig implements WebFluxConfigurer {
                         new SimpleGrantedAuthority(ROLE_PREFIX.concat(userClaims.role().name()))
                     );
                     return new UsernamePasswordAuthenticationToken(
-                        userClaims, null, authorities
+                        userClaims, token, authorities
                     );
                 });
         };

@@ -1,6 +1,6 @@
 package com.crediya.api.filters;
 
-import com.crediya.api.config.CorrelationConstants;
+import com.crediya.api.constants.CorrelationConstants;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.NonNull;
@@ -13,6 +13,9 @@ import reactor.util.context.Context;
 
 import java.util.UUID;
 
+import static com.crediya.api.constants.CorrelationConstants.CORRELATION_ID_KEY;
+import static com.crediya.api.constants.CorrelationConstants.X_CORRELATION_ID;
+
 @Component
 public class CorrelationWebFilter implements WebFilter {
 	
@@ -22,15 +25,15 @@ public class CorrelationWebFilter implements WebFilter {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
-		String correlationIdInHeader = request.getHeaders().getFirst(CorrelationConstants.X_CORRELATION_ID);
+		String correlationIdInHeader = request.getHeaders().getFirst(X_CORRELATION_ID);
 		String correlationId = correlationIdInHeader != null && !correlationIdInHeader.isBlank()
 			? correlationIdInHeader
 			: generateCorrelationId();
 
-		response.getHeaders().add(CorrelationConstants.X_CORRELATION_ID, correlationId);
+		response.getHeaders().add(X_CORRELATION_ID, correlationId);
 
 		return chain.filter(exchange)
-			.contextWrite(Context.of(CorrelationConstants.CORRELATION_ID_KEY, correlationId));
+			.contextWrite(Context.of(CORRELATION_ID_KEY, correlationId));
 	}
 	
 	private String generateCorrelationId() {

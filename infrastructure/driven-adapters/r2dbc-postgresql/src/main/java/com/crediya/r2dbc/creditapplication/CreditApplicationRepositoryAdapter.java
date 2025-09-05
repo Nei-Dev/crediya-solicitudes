@@ -1,16 +1,21 @@
 package com.crediya.r2dbc.creditapplication;
 
+import com.crediya.model.PaginationResponse;
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
+import com.crediya.model.projection.CreditApplicationProjection;
 import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.exceptions.StateNotFoundException;
 import com.crediya.r2dbc.mappers.CreditApplicationEntityMapper;
 import com.crediya.r2dbc.statecreditapplication.StateCreditApplicationReactiveRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static com.crediya.r2dbc.constants.ErrorMessage.STATE_NOT_FOUND;
@@ -41,6 +46,21 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				})
 				.flatMap(this::mapToEntity)
 		);
+	}
+	
+	@Override
+	public Mono<PaginationResponse<CreditApplicationProjection>> getAllApplications(PaginationCreditApplicationFilter filter) {
+		int offset = (filter.getPage() - 1) * filter.getSize();
+		
+		Flux<CreditApplicationProjection> content = creditApplicationRepository.findCreditsWithDetails(
+			filter.getSize(),
+			offset,
+			filter.getSortebBy(),
+			Sort.Direction.ASC.name(),
+			filter.getStatus().name(),
+			filter.getAutoEvaluation()
+		);
+		return null;
 	}
 	
 	private Mono<CreditApplication> mapToEntity(CreditApplicationData data) {

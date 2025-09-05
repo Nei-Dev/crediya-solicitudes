@@ -7,6 +7,8 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 
+import static com.crediya.r2dbc.entities.CreditApplicationColumns.*;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,28 +18,28 @@ import java.math.BigDecimal;
 public class CreditApplicationData {
 	
 	@Id
-	@Column("id_application")
+	@Column(ID_APPLICATION)
 	private Long idApplication;
 	
-	@Column("id_credit_type")
+	@Column(ID_CREDIT_TYPE)
 	private Long idCreditType;
 	
-	@Column("id_state")
+	@Column(ID_STATE)
 	private Long idState;
 	
-	@Column("amount")
+	@Column(AMOUNT)
 	private BigDecimal amount;
 	
-	@Column("term")
+	@Column(TERM)
 	private Integer term;
 	
-	@Column("email")
+	@Column(EMAIL)
 	private String email;
 	
-	@Column("client_name")
+	@Column(CLIENT_NAME)
 	private String clientName;
 	
-	@Column("client_salary_base")
+	@Column(CLIENT_SALARY_BASE)
 	private BigDecimal clientSalaryBase;
 	
 }

@@ -3,7 +3,7 @@ package com.crediya.model.constants;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public class ErrorMessage {
+public class CreateCreditApplicationErrorMessage {
 	
 	public static final String NULL_CREDIT_APPLICATION = "Credit application cannot be null";
 	public static final String INVALID_AMOUNT_REQUESTED = "Amount requested is required and must be greater than zero";

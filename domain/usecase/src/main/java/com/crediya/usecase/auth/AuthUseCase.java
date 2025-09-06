@@ -9,8 +9,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
-import static com.crediya.model.constants.ErrorMessage.USER_NOT_FOUND;
-import static com.crediya.model.constants.ErrorMessage.USER_NOT_MATCH;
+import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.USER_NOT_FOUND;
+import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.USER_NOT_MATCH;
 
 @RequiredArgsConstructor
 public class AuthUseCase implements IAuthUseCase {

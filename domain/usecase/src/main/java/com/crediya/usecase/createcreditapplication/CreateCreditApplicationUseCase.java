@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static com.crediya.model.constants.ErrorMessage.*;
+import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.*;
 import static com.crediya.model.constants.Regex.EMAIL;
 import static com.crediya.model.constants.Regex.IDENTIFICATION;
 import static com.crediya.model.creditapplication.StateCreditApplication.PENDING;

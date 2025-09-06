@@ -24,6 +24,11 @@ public class CreditApplicationRouterRest {
                 creditApplicationHandler::createApplication,
                 CreditApplicationDocApi::createCreditApplicationDoc
             )
+            .GET(
+                path.getListCreditApplication(),
+                creditApplicationHandler::getAllApplications,
+                CreditApplicationDocApi::listCreditApplicationDoc
+            )
             .build();
     }
 }

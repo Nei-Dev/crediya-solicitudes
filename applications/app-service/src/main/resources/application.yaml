@@ -14,8 +14,6 @@ adapters:
     username: "${DB_USER:postgres}"
     password: "${DB_PASSWORD:postgres}"
 logging:
-#  pattern:
-#    level: "%5p [correlationId=%X{correlationId}]"
   level:
     com.crediya: "${LOG_LEVEL:INFO}"
 management:

@@ -1,11 +1,11 @@
 package com.crediya.usecase.getcreditapplication;
 
 import com.crediya.model.PaginationResponse;
+import com.crediya.model.creditapplication.CreditApplicationSummary;
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.creditapplication.ports.IGetCreditApplicationPaginatedUseCase;
-import com.crediya.model.projection.CreditApplicationSummary;
-import com.crediya.model.projection.pagination.InvalidPaginationFilterException;
+import com.crediya.model.exceptions.pagination.InvalidPaginationFilterException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 

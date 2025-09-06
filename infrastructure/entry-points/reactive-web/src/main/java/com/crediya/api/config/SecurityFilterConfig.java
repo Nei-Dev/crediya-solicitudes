@@ -31,6 +31,7 @@ import java.util.List;
 
 import static com.crediya.api.constants.ErrorMessage.ACCESS_DENIED;
 import static com.crediya.api.constants.ErrorMessage.UNAUTHORIZED;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 @Slf4j
@@ -66,6 +67,7 @@ public class SecurityFilterConfig implements WebFluxConfigurer {
             .authorizeExchange(authorize -> authorize
                 .pathMatchers(ALLOWED_PATHS_SWAGGER).permitAll()
                 .pathMatchers(POST, path.getCreateApplication()).hasRole(UserRole.CLIENT.name())
+                .pathMatchers(GET, path.getListCreditApplication()).hasRole(UserRole.MANAGER.name())
                 .anyExchange().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions
@@ -116,7 +118,7 @@ public class SecurityFilterConfig implements WebFluxConfigurer {
     }
     
     private Mono<Void> handleAccessDenied(ServerWebExchange exchange, AccessDeniedException ex) {
-        ErrorResponse response = ErrorResponse.unauthorized(ACCESS_DENIED);
+        ErrorResponse response = ErrorResponse.forbidden(ACCESS_DENIED);
         return defaultResponseHelper.writeJsonResponse(exchange.getResponse(), response);
     }
 }

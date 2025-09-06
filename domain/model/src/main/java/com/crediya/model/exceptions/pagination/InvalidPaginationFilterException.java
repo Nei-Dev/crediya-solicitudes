@@ -1,4 +1,4 @@
-package com.crediya.model.projection.pagination;
+package com.crediya.model.exceptions.pagination;
 
 import com.crediya.model.exceptions.BusinessException;
 

@@ -1,4 +1,4 @@
-package com.crediya.model.projection;
+package com.crediya.model.creditapplication;
 
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +17,6 @@ public class CreditApplicationSummary {
 	private BigDecimal interestRate;
 	private String stateApplication;
 	private BigDecimal salaryBase;
-	private BigDecimal monthlyAccumulatedApproved;
+	private BigDecimal monthlyAmount;
 	
 }

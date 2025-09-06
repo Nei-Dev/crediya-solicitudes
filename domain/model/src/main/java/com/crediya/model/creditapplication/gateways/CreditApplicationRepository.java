@@ -2,8 +2,8 @@ package com.crediya.model.creditapplication.gateways;
 
 import com.crediya.model.PaginationResponse;
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.CreditApplicationSummary;
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
-import com.crediya.model.projection.CreditApplicationSummary;
 import reactor.core.publisher.Mono;
 
 public interface CreditApplicationRepository {

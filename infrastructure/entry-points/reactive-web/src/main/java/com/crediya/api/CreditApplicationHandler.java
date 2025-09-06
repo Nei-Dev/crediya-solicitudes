@@ -15,6 +15,7 @@ import com.crediya.model.creditapplication.ports.IGetCreditApplicationPaginatedU
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.helpers.SortDirection;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import static com.crediya.api.constants.PaginationParams.*;
 import static com.crediya.api.constants.ResponseMessage.CREDIT_APPLICATION_CREATED;
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.NULL_CREDIT_APPLICATION;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CreditApplicationHandler {
@@ -38,6 +40,7 @@ public class CreditApplicationHandler {
 	public Mono<ServerResponse> createApplication(ServerRequest serverRequest) {
 		return serverRequest.bodyToMono(CreateCreditApplicationRequest.class)
 			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(NULL_CREDIT_APPLICATION)))
+			.doOnSubscribe(subs -> log.trace("Starting create credit application request"))
 			.flatMap(validatorApi::validate)
 			.map(CreditApplicationEntityMapper.INSTANCE::toEntity)
 			.flatMap(app -> serverRequest.principal()
@@ -48,6 +51,7 @@ public class CreditApplicationHandler {
 				.flatMap(user -> enrichWithUserData(app, user))
 				.flatMap(createCreditApplicationUseCase::execute)
 				.map(CreditApplicationResponseMapper.INSTANCE::toResponse)
+				.doOnSuccess(res -> log.info("Credit application created with id {}", res.id()))
 				.flatMap(dtoResponse -> ServerResponse.status(HttpStatus.CREATED)
 					.bodyValue(CreditApplicationApiResponse.of(
 						dtoResponse,
@@ -59,7 +63,9 @@ public class CreditApplicationHandler {
 	
 	public Mono<ServerResponse> getAllApplications(ServerRequest serverRequest) {
 		return buildFilter(serverRequest)
+			.doOnNext(filter -> log.trace("Retrieving credit applications: {}", filter))
 			.flatMap(getCreditApplicationPaginatedUseCase::execute)
+			.doOnSuccess(pag -> log.info("Credit applications page {} retrieved with {} records", pag.getPage(), pag.getContent().size()))
 			.flatMap(res -> ServerResponse.ok()
 				.bodyValue(res)
 			);
@@ -85,10 +91,10 @@ public class CreditApplicationHandler {
 			.page(page)
 			.size(size)
 			.sortBy(sortBy)
-			.direction(sanitizeDirection(directionParam));
+			.direction(sanitizeParamDirection(directionParam));
 		
 		if (statusParam != null) {
-			builder.status(sanitizeStatus(statusParam));
+			builder.status(sanitizeParamStatus(statusParam));
 		}
 		
 		if (autoEvalParam != null) {
@@ -98,7 +104,7 @@ public class CreditApplicationHandler {
 		return Mono.just(builder.build());
 	}
 	
-	private StateCreditApplication sanitizeStatus(String statusParam) {
+	private StateCreditApplication sanitizeParamStatus(String statusParam) {
 		try {
 			return StateCreditApplication.valueOf(statusParam.toUpperCase());
 		} catch (IllegalArgumentException e) {
@@ -106,7 +112,7 @@ public class CreditApplicationHandler {
 		}
 	}
 	
-	private SortDirection sanitizeDirection(String directionParam) {
+	private SortDirection sanitizeParamDirection(String directionParam) {
 		try {
 			return SortDirection.valueOf(directionParam.toUpperCase());
 		} catch (IllegalArgumentException e) {

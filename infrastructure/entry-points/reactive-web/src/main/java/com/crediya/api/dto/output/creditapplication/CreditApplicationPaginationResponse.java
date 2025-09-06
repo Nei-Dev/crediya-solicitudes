@@ -1,7 +1,7 @@
 package com.crediya.api.dto.output.creditapplication;
 
 import com.crediya.model.PaginationResponse;
-import com.crediya.model.projection.CreditApplicationSummary;
+import com.crediya.model.creditapplication.CreditApplicationSummary;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor

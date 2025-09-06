@@ -2,10 +2,10 @@ package com.crediya.r2dbc.creditapplication;
 
 import com.crediya.model.PaginationResponse;
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.CreditApplicationSummary;
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
-import com.crediya.model.projection.CreditApplicationSummary;
 import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.exceptions.StateNotFoundException;
 import com.crediya.r2dbc.mappers.CreditApplicationEntityMapper;
@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import static com.crediya.r2dbc.constants.CreditApplicationPaginationConstants.*;
 import static com.crediya.r2dbc.constants.ErrorMessage.STATE_NOT_FOUND;
 
 @Slf4j
@@ -32,20 +33,6 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	private final StateCreditApplicationReactiveRepository stateRepository;
 	private final TransactionalOperator transactionalOperator;
 	private final DatabaseClient databaseClient;
-	
-	private static final String PARAM_STATE_APPLICATION = "stateApplication";
-	private static final String PARAM_IS_AUTO_EVALUATION = "isAutoEvaluation";
-	private static final String PARAM_LIMIT = "limit";
-	private static final String PARAM_OFFSET = "offset";
-
-	private static final String COL_AMOUNT = "amount";
-	private static final String COL_TERM = "term";
-	private static final String COL_EMAIL = "email";
-	private static final String COL_CLIENT_NAME = "clientName";
-	private static final String COL_CREDIT_TYPE = "creditType";
-	private static final String COL_INTEREST_RATE = "interestRate";
-	private static final String COL_STATE_APPLICATION = "stateApplication";
-	private static final String COL_SALARY_BASE = "salaryBase";
 
 	private static final String COUNT_QUERY = """
 	    SELECT COUNT(*)
@@ -94,6 +81,8 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				content.collectList(),
 				total
 			)
+			.doOnSubscribe(subs -> log.trace("Retrieving paginated credit applications from database with filter: {}", filter))
+			.doOnSuccess(res -> log.debug("Result paginated retrieved with {}", res.getT1().size()))
 			.map(tuple -> {
 				long totalElements = tuple.getT2();
 				int totalPages = (int) Math.ceil((double) totalElements / filter.getSize());
@@ -106,6 +95,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 					.build();
 			});
 	}
+	
 	private Mono<CreditApplication> mapToEntity(CreditApplicationData data) {
 		if (data == null) {
 			return Mono.empty();
@@ -149,6 +139,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				.interestRate(row.get(COL_INTEREST_RATE, BigDecimal.class))
 				.stateApplication(row.get(COL_STATE_APPLICATION, String.class))
 				.salaryBase(row.get(COL_SALARY_BASE, BigDecimal.class))
+				.monthlyAmount(row.get(COL_MONTHLY_AMOUNT, BigDecimal.class))
 				.build()
 			)
 			.all();
@@ -163,13 +154,6 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 			.one();
 	}
 	
-	private String sanitizeSortBy(String sortBy) {
-		return switch (sortBy) {
-			case COL_AMOUNT, COL_TERM, COL_EMAIL, COL_CLIENT_NAME, COL_CREDIT_TYPE, COL_INTEREST_RATE, COL_STATE_APPLICATION, COL_SALARY_BASE -> sortBy;
-			default -> COL_AMOUNT;
-		};
-	}
-
 	@SuppressWarnings("squid:S2077")
 	private String buildPaginatedQuery(String sortBy, String sortDirection) {
 		return String.format("""
@@ -181,7 +165,8 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 					ct.name AS creditType,
 					ct.interest_rate AS interestRate,
 					st.name AS stateApplication,
-					app.client_salary_base AS salaryBase
+					app.client_salary_base AS salaryBase,
+					ROUND((app.amount + (app.amount * (ct.interest_rate / 100) * (app.term / 12.0))) / app.term, 2) AS monthlyAmount
 				FROM application app
 				JOIN credit_type ct ON ct.id_credit_type = app.id_credit_type
 				JOIN state st ON st.id_state = app.id_state
@@ -190,6 +175,21 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				ORDER BY %s %s
 				LIMIT :limit OFFSET :offset
 			""", sortBy, sortDirection);
+	}
+	
+	private String sanitizeSortBy(String sortBy) {
+		return switch (sortBy) {
+			case COL_AMOUNT,
+			     COL_TERM,
+			     COL_EMAIL,
+			     COL_CLIENT_NAME,
+			     COL_CREDIT_TYPE,
+			     COL_INTEREST_RATE,
+			     COL_STATE_APPLICATION,
+			     COL_SALARY_BASE,
+			     COL_MONTHLY_AMOUNT -> sortBy;
+			default -> COL_AMOUNT;
+		};
 	}
 	
 }

@@ -19,7 +19,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import static com.crediya.r2dbc.constants.CreditApplicationPaginationConstants.*;
 import static com.crediya.r2dbc.constants.ErrorMessage.STATE_NOT_FOUND;
@@ -34,15 +33,6 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	private final TransactionalOperator transactionalOperator;
 	private final DatabaseClient databaseClient;
 
-	private static final String COUNT_QUERY = """
-	    SELECT COUNT(*)
-	    FROM application app
-	    JOIN credit_type ct ON ct.id_credit_type = app.id_credit_type
-	    JOIN state st ON st.id_state = app.id_state
-	    WHERE (:stateApplication IS NULL OR st.name = :stateApplication)
-	    AND (:isAutoEvaluation IS NULL OR ct.auto_validation = :isAutoEvaluation)
-	""";
-	
 	@Override
 	public Mono<CreditApplication> createApplication(CreditApplication creditApplication) {
 		CreditApplicationData dataToSave = CreditApplicationEntityMapper.INSTANCE.toData(creditApplication);
@@ -109,23 +99,15 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 			});
 	}
 	
-	private DatabaseClient.GenericExecuteSpec binNullParams(DatabaseClient.GenericExecuteSpec spec, PaginationCreditApplicationFilter filter) {
-		if (Objects.nonNull(filter.getStatus())) {
-			spec = spec.bind(PARAM_STATE_APPLICATION, filter.getStatus().name());
-		} else {
-			spec = spec.bindNull(PARAM_STATE_APPLICATION, String.class);
-		}
-		if (Objects.nonNull(filter.getAutoEvaluation())) {
-			spec = spec.bind(PARAM_IS_AUTO_EVALUATION, filter.getAutoEvaluation());
-		} else {
-			spec = spec.bindNull(PARAM_IS_AUTO_EVALUATION, Boolean.class);
-		}
-		return spec;
-	}
-
 	private Flux<CreditApplicationSummary> getContent(String sortBy, String sortDirection, PaginationCreditApplicationFilter filter, int offset) {
-		DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(buildPaginatedQuery(sortBy, sortDirection));
-		spec = this.binNullParams(spec, filter);
+        DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(
+            new CreditApplicationQueryBuilder()
+                .selectPaginatedFields()
+                .sortBy(sortBy)
+                .sortDirection(sortDirection)
+                .build()
+        );
+        spec = CreditApplicationQueryBuilder.bindParams(spec, filter);
 		
 		return spec
 			.bind(PARAM_LIMIT, filter.getSize())
@@ -146,35 +128,16 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	}
 	
 	private Mono<Long> getTotalCount(PaginationCreditApplicationFilter filter) {
-		DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(COUNT_QUERY);
-		spec = this.binNullParams(spec, filter);
+        DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(
+            new CreditApplicationQueryBuilder()
+                .selectCount()
+                .build()
+        );
+        spec = CreditApplicationQueryBuilder.bindParams(spec, filter);
 		
 		return spec
 			.map((row, metadata) -> row.get(0, Long.class))
 			.one();
-	}
-	
-	@SuppressWarnings("squid:S2077")
-	private String buildPaginatedQuery(String sortBy, String sortDirection) {
-		return String.format("""
-				SELECT
-					app.amount,
-					app.term,
-					app.email,
-					app.client_name AS clientName,
-					ct.name AS creditType,
-					ct.interest_rate AS interestRate,
-					st.name AS stateApplication,
-					app.client_salary_base AS salaryBase,
-					ROUND((app.amount + (app.amount * (ct.interest_rate / 100) * (app.term / 12.0))) / app.term, 2) AS monthlyAmount
-				FROM application app
-				JOIN credit_type ct ON ct.id_credit_type = app.id_credit_type
-				JOIN state st ON st.id_state = app.id_state
-				WHERE (:stateApplication IS NULL OR st.name = :stateApplication)
-				AND (:isAutoEvaluation IS NULL OR ct.auto_validation = :isAutoEvaluation)
-				ORDER BY %s %s
-				LIMIT :limit OFFSET :offset
-			""", sortBy, sortDirection);
 	}
 	
 	private String sanitizeSortBy(String sortBy) {

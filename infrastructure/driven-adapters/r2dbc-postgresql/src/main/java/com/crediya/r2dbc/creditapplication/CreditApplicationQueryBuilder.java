@@ -1,6 +1,7 @@
 package com.crediya.r2dbc.creditapplication;
 
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
+import com.crediya.model.helpers.SortDirection;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 import static com.crediya.r2dbc.constants.CreditApplicationPaginationConstants.*;
@@ -10,7 +11,7 @@ public class CreditApplicationQueryBuilder {
     private boolean withOrder = false;
     private boolean withPagination = false;
     private String sortBy = COL_AMOUNT;
-    private String sortDirection = "ASC";
+    private SortDirection sortDirection = SortDirection.ASC;
 
     public CreditApplicationQueryBuilder selectPaginatedFields() {
         this.projection = "app.amount, app.term, app.email, app.client_name AS clientName, ct.name AS creditType, ct.interest_rate AS interestRate, st.name AS stateApplication, app.client_salary_base AS salaryBase, ROUND((app.amount + (app.amount * (ct.interest_rate / 100) * (app.term / 12.0))) / app.term, 2) AS monthlyAmount";
@@ -31,7 +32,7 @@ public class CreditApplicationQueryBuilder {
         return this;
     }
 
-    public CreditApplicationQueryBuilder sortDirection(String sortDirection) {
+    public CreditApplicationQueryBuilder sortDirection(SortDirection sortDirection) {
         this.sortDirection = sortDirection;
         return this;
     }
@@ -46,23 +47,7 @@ public class CreditApplicationQueryBuilder {
         sb.append("WHERE (:stateApplication IS NULL OR st.name = :stateApplication)\n");
         sb.append("AND (:isAutoEvaluation IS NULL OR ct.auto_validation = :isAutoEvaluation)\n");
         if (withOrder) {
-            String safeSortBy = switch (sortBy) {
-                case COL_AMOUNT,
-                     COL_TERM,
-                     COL_EMAIL,
-                     COL_CLIENT_NAME,
-                     COL_CREDIT_TYPE,
-                     COL_INTEREST_RATE,
-                     COL_STATE_APPLICATION,
-                     COL_SALARY_BASE,
-                     COL_MONTHLY_AMOUNT -> sortBy;
-                default -> COL_AMOUNT;
-            };
-            String safeSortDirection = "ASC";
-            if ("DESC".equalsIgnoreCase(sortDirection)) {
-                safeSortDirection = "DESC";
-            }
-            sb.append(String.format("ORDER BY %s %s ", safeSortBy, safeSortDirection));
+            sb.append(String.format("ORDER BY %s %s ", this.sanitizeSortBy(sortBy), sortDirection.name()));
         }
         if (withPagination) {
             sb.append("LIMIT :limit OFFSET :offset ");
@@ -87,5 +72,20 @@ public class CreditApplicationQueryBuilder {
             spec = spec.bindNull(PARAM_IS_AUTO_EVALUATION, Boolean.class);
         }
         return spec;
+    }
+    
+    private String sanitizeSortBy(String sortBy) {
+        return switch (sortBy) {
+            case COL_AMOUNT,
+                 COL_TERM,
+                 COL_EMAIL,
+                 COL_CLIENT_NAME,
+                 COL_CREDIT_TYPE,
+                 COL_INTEREST_RATE,
+                 COL_STATE_APPLICATION,
+                 COL_SALARY_BASE,
+                 COL_MONTHLY_AMOUNT -> sortBy;
+            default -> COL_AMOUNT;
+        };
     }
 }

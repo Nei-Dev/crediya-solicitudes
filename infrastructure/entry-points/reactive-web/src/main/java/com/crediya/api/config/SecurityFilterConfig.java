@@ -1,6 +1,5 @@
 package com.crediya.api.config;
 
-import com.crediya.api.constants.Path;
 import com.crediya.api.dto.output.ErrorResponse;
 import com.crediya.api.filters.CorrelationWebFilter;
 import com.crediya.api.helpers.DefaultResponseHelper;
@@ -31,8 +30,7 @@ import java.util.List;
 
 import static com.crediya.api.constants.ErrorMessage.ACCESS_DENIED;
 import static com.crediya.api.constants.ErrorMessage.UNAUTHORIZED;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 @Slf4j
 @Configuration
@@ -68,6 +66,7 @@ public class SecurityFilterConfig implements WebFluxConfigurer {
                 .pathMatchers(ALLOWED_PATHS_SWAGGER).permitAll()
                 .pathMatchers(POST, path.getCreateApplication()).hasRole(UserRole.CLIENT.name())
                 .pathMatchers(GET, path.getListCreditApplication()).hasRole(UserRole.MANAGER.name())
+                .pathMatchers(PUT, path.getUpdateStateCreditApplication()).permitAll()
                 .anyExchange().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions

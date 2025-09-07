@@ -1,8 +1,9 @@
 package com.crediya.api.constants;
 
-public final class ValidationMessage {
+import lombok.experimental.UtilityClass;
 
-    private ValidationMessage() {}
+@UtilityClass
+public final class ValidationMessage {
 
     public static final String AMOUNT_NOT_NULL = "Amount cannot be null";
     public static final String AMOUNT_POSITIVE = "Amount must be a positive number";
@@ -15,5 +16,9 @@ public final class ValidationMessage {
     public static final String INVALID_IDENTIFICATION = "Identification is invalid";
     public static final String CREDIT_TYPE_ID_NOT_NULL = "Credit type ID cannot be null";
     public static final String CREDIT_TYPE_ID_POSITIVE = "Credit type ID must be a positive number";
+    
+    public static final String ID_CREDIT_APPLICATION_NOT_NULL = "Credit application ID cannot be null";
+    public static final String ID_CREDIT_APPLICATION_POSITIVE = "Credit application ID must be a positive number";
+    public static final String STATE_NOT_BLANK = "State is required and cannot be blank";
 
 }

@@ -8,8 +8,10 @@ import reactor.core.publisher.Mono;
 
 public interface CreditApplicationRepository {
 	
-	Mono<CreditApplication> createApplication(CreditApplication creditApplication);
+	Mono<CreditApplication> saveCreditApplication(CreditApplication creditApplication);
 	
 	Mono<PaginationResponse<CreditApplicationSummary>> getAllApplications(PaginationCreditApplicationFilter filter);
+	
+	Mono<CreditApplication> findById(Long id);
 	
 }

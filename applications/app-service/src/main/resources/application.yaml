@@ -35,7 +35,11 @@ adapter:
     timeout: 5000
     url: "${AUTH_URL:http://localhost:8080/api}"
     path:
-      me: /v1/auth/me
+      me: "/v1/auth/me"
+  sqs:
+    region: "${SQS_REGION}"
+    queueUrl: "${SQS_QUEUE_URL}"
+#    endpoint: "http://localhost:4566 # For localstack only"
 resilience4j:
   circuitbreaker:
     instances:
@@ -60,5 +64,6 @@ resilience4j:
 app:
   paths:
     credit-application:
-      createApplication: /api/v1/credit-application
-      listCreditApplication: /api/v1/credit-application
+      createApplication: "/api/v1/credit-application"
+      listCreditApplication: "/api/v1/credit-application"
+      updateStateCreditApplication: "/api/v1/credit-application/update-state"

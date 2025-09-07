@@ -123,4 +123,10 @@ public class CreditApplicationDocApi {
 		);
 	}
 	
+	public void updateStateCreditApplicationDoc(Builder builder) {
+		ApiDocHelper.commonErrorResponse(
+			builder
+		);
+	}
+	
 }

@@ -1,6 +1,6 @@
 package com.crediya.api;
 
-import com.crediya.api.constants.Path;
+import com.crediya.api.config.Path;
 import com.crediya.api.openapi.CreditApplicationDocApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +28,11 @@ public class CreditApplicationRouterRest {
                 path.getListCreditApplication(),
                 creditApplicationHandler::getAllApplications,
                 CreditApplicationDocApi::listCreditApplicationDoc
+            )
+            .PUT(
+                path.getUpdateStateCreditApplication(),
+                creditApplicationHandler::updateStateCreditApplication,
+                CreditApplicationDocApi::updateStateCreditApplicationDoc
             )
             .build();
     }

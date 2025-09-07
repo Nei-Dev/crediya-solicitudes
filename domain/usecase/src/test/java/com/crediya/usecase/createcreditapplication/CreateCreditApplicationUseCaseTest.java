@@ -71,7 +71,7 @@ class CreateCreditApplicationUseCaseTest {
 
         when(creditTypeRepository.findById(any(Long.class)))
                 .thenReturn(Mono.just(creditTypeRegistered));
-        when(creditApplicationRepository.createApplication(any(CreditApplication.class)))
+        when(creditApplicationRepository.saveCreditApplication(any(CreditApplication.class)))
                 .thenReturn(Mono.just(creditApplicationSaved));
 
         StepVerifier.create(useCase.execute(creditApplication))

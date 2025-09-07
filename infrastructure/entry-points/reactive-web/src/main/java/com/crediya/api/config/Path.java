@@ -1,4 +1,4 @@
-package com.crediya.api.constants;
+package com.crediya.api.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,5 +11,6 @@ public class Path {
 	
 	private String createApplication;
 	private String listCreditApplication;
+	private String updateStateCreditApplication;
 	
 }

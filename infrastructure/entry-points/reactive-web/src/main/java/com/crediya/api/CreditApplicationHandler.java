@@ -1,6 +1,8 @@
 package com.crediya.api;
 
 import com.crediya.api.dto.input.CreateCreditApplicationRequest;
+import com.crediya.api.dto.input.UpdateStateCreditApplication;
+import com.crediya.api.dto.output.ApiResponse;
 import com.crediya.api.dto.output.creditapplication.CreditApplicationApiResponse;
 import com.crediya.api.helpers.ValidatorApi;
 import com.crediya.api.mapper.CreditApplicationEntityMapper;
@@ -14,6 +16,7 @@ import com.crediya.model.creditapplication.ports.ICreateCreditApplicationUseCase
 import com.crediya.model.creditapplication.ports.IGetCreditApplicationPaginatedUseCase;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.helpers.SortDirection;
+import com.crediya.usecase.updatestatecreditapplication.UpdateStateCreditApplicationUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import static com.crediya.api.constants.PaginationParams.*;
 import static com.crediya.api.constants.ResponseMessage.CREDIT_APPLICATION_CREATED;
+import static com.crediya.api.constants.ResponseMessage.CREDIT_APPLICATION_UPDATED;
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.NULL_CREDIT_APPLICATION;
 
 @Slf4j
@@ -33,9 +37,10 @@ import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.NU
 public class CreditApplicationHandler {
 	
 	private final ValidatorApi validatorApi;
+	private final IAuthUseCase authUseCase;
 	private final ICreateCreditApplicationUseCase createCreditApplicationUseCase;
 	private final IGetCreditApplicationPaginatedUseCase getCreditApplicationPaginatedUseCase;
-	private final IAuthUseCase authUseCase;
+	private final UpdateStateCreditApplicationUseCase updateStateCreditApplicationUseCase;
 	
 	public Mono<ServerResponse> createApplication(ServerRequest serverRequest) {
 		return serverRequest.bodyToMono(CreateCreditApplicationRequest.class)
@@ -69,6 +74,17 @@ public class CreditApplicationHandler {
 			.flatMap(res -> ServerResponse.ok()
 				.bodyValue(res)
 			);
+	}
+	
+	public Mono<ServerResponse> updateStateCreditApplication(ServerRequest serverRequest) {
+		return serverRequest.bodyToMono(UpdateStateCreditApplication.class)
+			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(NULL_CREDIT_APPLICATION)))
+			.doOnSubscribe(subs -> log.trace("Starting update state credit application request"))
+			.flatMap(validatorApi::validate)
+			.flatMap(req -> updateStateCreditApplicationUseCase.execute(req.idCreditApplication(), req.state()))
+			.then(ServerResponse.ok().bodyValue(
+				ApiResponse.of(CREDIT_APPLICATION_UPDATED)
+			));
 	}
 	
 	private Mono<CreditApplication> enrichWithUserData(CreditApplication application, User user) {

@@ -6,6 +6,7 @@ import com.crediya.model.creditapplication.CreditApplicationSummary;
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
+import com.crediya.model.helpers.SortDirection;
 import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.exceptions.StateNotFoundException;
 import com.crediya.r2dbc.mappers.CreditApplicationEntityMapper;
@@ -34,7 +35,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	private final DatabaseClient databaseClient;
 
 	@Override
-	public Mono<CreditApplication> createApplication(CreditApplication creditApplication) {
+	public Mono<CreditApplication> saveCreditApplication(CreditApplication creditApplication) {
 		CreditApplicationData dataToSave = CreditApplicationEntityMapper.INSTANCE.toData(creditApplication);
 		String state = creditApplication.getState().name();
 		
@@ -55,12 +56,10 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	@Override
 	public Mono<PaginationResponse<CreditApplicationSummary>> getAllApplications(PaginationCreditApplicationFilter filter) {
 		int offset = (filter.getPage() - 1) * filter.getSize();
-		String sortBy = sanitizeSortBy(filter.getSortBy());
-		String sortDirection = filter.getDirection().name();
 
 		Flux<CreditApplicationSummary> content = this.getContent(
-			sortBy,
-			sortDirection,
+			filter.getSortBy(),
+			filter.getDirection(),
 			filter,
 			offset
 		);
@@ -72,7 +71,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				total
 			)
 			.doOnSubscribe(subs -> log.trace("Retrieving paginated credit applications from database with filter: {}", filter))
-			.doOnSuccess(res -> log.debug("Result paginated retrieved with {}", res.getT1().size()))
+			.doOnSuccess(res -> log.info("Result paginated retrieved with {}", res.getT1().size()))
 			.map(tuple -> {
 				long totalElements = tuple.getT2();
 				int totalPages = (int) Math.ceil((double) totalElements / filter.getSize());
@@ -84,6 +83,15 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 					.totalPages(totalPages)
 					.build();
 			});
+	}
+	
+	@Override
+	public Mono<CreditApplication> findById(Long id) {
+		return creditApplicationRepository.findById(id)
+			.doOnSubscribe(subscription -> log.trace("Searching credit application by id: {}", id))
+			.switchIfEmpty(Mono.empty())
+			.doOnSuccess(creditApplicationData -> log.info("Credit application found with id: {}", id))
+			.flatMap(this::mapToEntity);
 	}
 	
 	private Mono<CreditApplication> mapToEntity(CreditApplicationData data) {
@@ -99,7 +107,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 			});
 	}
 	
-	private Flux<CreditApplicationSummary> getContent(String sortBy, String sortDirection, PaginationCreditApplicationFilter filter, int offset) {
+	private Flux<CreditApplicationSummary> getContent(String sortBy, SortDirection sortDirection, PaginationCreditApplicationFilter filter, int offset) {
         DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(
             new CreditApplicationQueryBuilder()
                 .selectPaginatedFields()
@@ -138,21 +146,6 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 		return spec
 			.map((row, metadata) -> row.get(0, Long.class))
 			.one();
-	}
-	
-	private String sanitizeSortBy(String sortBy) {
-		return switch (sortBy) {
-			case COL_AMOUNT,
-			     COL_TERM,
-			     COL_EMAIL,
-			     COL_CLIENT_NAME,
-			     COL_CREDIT_TYPE,
-			     COL_INTEREST_RATE,
-			     COL_STATE_APPLICATION,
-			     COL_SALARY_BASE,
-			     COL_MONTHLY_AMOUNT -> sortBy;
-			default -> COL_AMOUNT;
-		};
 	}
 	
 }

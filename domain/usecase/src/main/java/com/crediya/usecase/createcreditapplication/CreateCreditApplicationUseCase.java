@@ -39,7 +39,7 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
             .flatMap(this::validateIdentification)
             .flatMap(this::validateCreditType)
             .flatMap(this::setPendingState)
-            .flatMap(creditApplicationRepository::createApplication);
+            .flatMap(creditApplicationRepository::saveCreditApplication);
     }
 
     private Mono<CreditApplication> validateAmountRequested(CreditApplication creditApplication) {

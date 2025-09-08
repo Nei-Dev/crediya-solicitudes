@@ -20,19 +20,27 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 	private final MessageService messageService;
 	
 	@Override
-	public Mono<Void> execute(Long idCreditApplication, StateCreditApplication state) {
-		return this.validateState(state)
-			.flatMap(newSate -> this.validateIdCreditApplication(idCreditApplication)
+	public Mono<Void> execute(Long idCreditApplication, StateCreditApplication newState) {
+		return this.validateState(newState)
+			.flatMap(validState -> this.validateIdCreditApplication(idCreditApplication)
 				.flatMap(repository::findById)
 				.switchIfEmpty(Mono.error(new CreditApplicationNotFoundException(CREDIT_APPLICATION_NOT_FOUND)))
 				.flatMap(creditApplication -> {
 					if (creditApplication.getState() != StateCreditApplication.PENDING) {
 						return Mono.error(new InvalidStateCreditApplication(STATE_CANNOT_BE_MODIFIED));
 					}
-					creditApplication.setState(newSate);
-					return repository.saveCreditApplication(creditApplication);
+					StateCreditApplication previousState = creditApplication.getState();
+					creditApplication.setState(validState);
+					return repository.saveCreditApplication(creditApplication)
+						.flatMap(saved -> messageService.sendChangeStateCreditApplication(saved)
+							.onErrorResume(ex -> {
+									creditApplication.setState(previousState);
+									return repository.saveCreditApplication(creditApplication)
+										.then(Mono.error(ex));
+								}
+							)
+						);
 				}))
-			.flatMap(messageService::sendChangeStateCreditApplication)
 			.then();
 	}
 	

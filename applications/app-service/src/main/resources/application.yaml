@@ -1,21 +1,21 @@
 server:
-  port: "${PORT:8080}"
+  port: ${PORT:8080}
 spring:
   application:
-    name: "solicitudes"
+    name: solicitudes
   devtools:
     add-properties: false
 adapters:
   r2dbc:
-    host: "${DB_HOST:localhost}"
-    port: "${DB_PORT:5441}"
-    database: "${DB_NAME:solicitudes_db}"
-    schema: "${DB_SCHEMA:public}"
-    username: "${DB_USER:postgres}"
-    password: "${DB_PASSWORD:postgres}"
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5441}
+    database: ${DB_NAME:solicitudes_db}
+    schema: ${DB_SCHEMA:public}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
 logging:
   level:
-    com.crediya: "${LOG_LEVEL:INFO}"
+    com.crediya: ${LOG_LEVEL:INFO}
 management:
   endpoints:
     web:
@@ -33,13 +33,13 @@ cors:
 adapter:
   restconsumer:
     timeout: 5000
-    url: "${AUTH_URL:http://localhost:8080/api}"
+    url: ${AUTH_URL:http://localhost:8080/api}
     path:
-      me: "/v1/auth/me"
+      me: /v1/auth/me
   sqs:
-    region: "${SQS_REGION}"
-    queueUrl: "${SQS_QUEUE_URL}"
-#    endpoint: "http://localhost:4566 # For localstack only"
+    region: ${SQS_REGION}
+    queueUrl: ${SQS_QUEUE_URL}
+#    endpoint: "http://localhost:4566"
 resilience4j:
   circuitbreaker:
     instances:
@@ -61,9 +61,11 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
+jwt:
+    secret: ${JWT_SECRET}
 app:
   paths:
     credit-application:
-      createApplication: "/api/v1/credit-application"
-      listCreditApplication: "/api/v1/credit-application"
-      updateStateCreditApplication: "/api/v1/credit-application/update-state"
+      createApplication: /api/v1/credit-application
+      listCreditApplication: /api/v1/credit-application
+      updateStateCreditApplication: /api/v1/credit-application/update-state

@@ -30,6 +30,7 @@ import static com.crediya.api.constants.PaginationParams.*;
 import static com.crediya.api.constants.ResponseMessage.CREDIT_APPLICATION_CREATED;
 import static com.crediya.api.constants.ResponseMessage.CREDIT_APPLICATION_UPDATED;
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.NULL_CREDIT_APPLICATION;
+import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.USER_NOT_MATCH;
 
 @Slf4j
 @Component
@@ -51,8 +52,8 @@ public class CreditApplicationHandler {
 			.flatMap(app -> serverRequest.principal()
 				.cast(UsernamePasswordAuthenticationToken.class)
 				.map(auth -> ( String ) auth.getCredentials())
-				.log()
 				.flatMap(authUseCase::getUserByToken)
+				.flatMap(user -> this.validateSameUser(app, user))
 				.flatMap(user -> enrichWithUserData(app, user))
 				.flatMap(createCreditApplicationUseCase::execute)
 				.map(CreditApplicationResponseMapper.INSTANCE::toResponse)
@@ -81,15 +82,21 @@ public class CreditApplicationHandler {
 			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(NULL_CREDIT_APPLICATION)))
 			.doOnSubscribe(subs -> log.trace("Starting update state credit application request"))
 			.flatMap(validatorApi::validate)
-			.flatMap(req -> updateStateCreditApplicationUseCase.execute(req.idCreditApplication(), req.state()))
+			.flatMap(req -> updateStateCreditApplicationUseCase.execute(req.idCreditApplication(), sanitizeStatus(req.state())))
 			.then(ServerResponse.ok().bodyValue(
 				ApiResponse.of(CREDIT_APPLICATION_UPDATED)
 			));
 	}
 	
+	private Mono<User> validateSameUser(CreditApplication application, User user) {
+		return Mono.just(user)
+			.filter(u -> application.getIdentification().equals(u.getIdentification()))
+			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(USER_NOT_MATCH)))
+			.filter(u -> application.getEmail().equals(u.getEmail()))
+			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(USER_NOT_MATCH)));
+	}
+	
 	private Mono<CreditApplication> enrichWithUserData(CreditApplication application, User user) {
-		application.setEmail(user.getEmail());
-		application.setIdentification(user.getIdentification());
 		application.setClientName(user.getFullname());
 		application.setClientSalaryBase(user.getSalaryBase());
 		return Mono.just(application);
@@ -107,10 +114,10 @@ public class CreditApplicationHandler {
 			.page(page)
 			.size(size)
 			.sortBy(sortBy)
-			.direction(sanitizeParamDirection(directionParam));
+			.direction(sanitizeDirection(directionParam));
 		
 		if (statusParam != null) {
-			builder.status(sanitizeParamStatus(statusParam));
+			builder.status(sanitizeStatus(statusParam));
 		}
 		
 		if (autoEvalParam != null) {
@@ -120,7 +127,7 @@ public class CreditApplicationHandler {
 		return Mono.just(builder.build());
 	}
 	
-	private StateCreditApplication sanitizeParamStatus(String statusParam) {
+	private StateCreditApplication sanitizeStatus(String statusParam) {
 		try {
 			return StateCreditApplication.valueOf(statusParam.toUpperCase());
 		} catch (IllegalArgumentException e) {
@@ -128,7 +135,7 @@ public class CreditApplicationHandler {
 		}
 	}
 	
-	private SortDirection sanitizeParamDirection(String directionParam) {
+	private SortDirection sanitizeDirection(String directionParam) {
 		try {
 			return SortDirection.valueOf(directionParam.toUpperCase());
 		} catch (IllegalArgumentException e) {

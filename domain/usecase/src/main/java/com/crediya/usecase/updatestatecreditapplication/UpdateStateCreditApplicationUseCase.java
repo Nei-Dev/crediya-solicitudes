@@ -20,7 +20,7 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 	private final MessageService messageService;
 	
 	@Override
-	public Mono<Void> execute(Long idCreditApplication, String state) {
+	public Mono<Void> execute(Long idCreditApplication, StateCreditApplication state) {
 		return this.validateState(state)
 			.flatMap(newSate -> this.validateIdCreditApplication(idCreditApplication)
 				.flatMap(repository::findById)
@@ -43,16 +43,10 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(INVALID_ID_CREDIT_APPLICATION)));
 	}
 	
-	private Mono<StateCreditApplication> validateState(String state) {
+	private Mono<StateCreditApplication> validateState(StateCreditApplication state) {
 		return Mono.justOrEmpty(state)
 			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(STATE_NOT_BLANK)))
-			.flatMap(s -> {
-				try {
-					StateCreditApplication newState = StateCreditApplication.valueOf(s);
-					return Mono.just(newState);
-				} catch (IllegalArgumentException e) {
-					return Mono.error(new InvalidStateCreditApplication(STATE_INVALID));
-				}
-			});
+			.filter(s -> s != StateCreditApplication.PENDING)
+			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(STATE_INVALID)));
 	}
 }

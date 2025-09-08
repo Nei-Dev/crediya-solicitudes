@@ -1,6 +1,8 @@
 package com.crediya.model.exceptions.statecreditapplication;
 
-public class InvalidStateCreditApplication extends RuntimeException {
+import com.crediya.model.exceptions.BusinessException;
+
+public class InvalidStateCreditApplication extends BusinessException {
 	public InvalidStateCreditApplication(String message) {
 		super(message);
 	}

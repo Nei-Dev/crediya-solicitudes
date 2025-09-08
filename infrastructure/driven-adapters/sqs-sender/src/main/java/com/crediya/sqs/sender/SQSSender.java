@@ -1,20 +1,25 @@
 package com.crediya.sqs.sender;
 
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.MessageService;
 import com.crediya.sqs.sender.config.SQSSenderProperties;
 import com.crediya.sqs.sender.dto.creditapplication.StatusUpdatedPayload;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+import java.util.Locale;
+
+import static java.text.NumberFormat.getCurrencyInstance;
+
 @Service
-@Log4j2
+@Slf4j
 @RequiredArgsConstructor
 public class SQSSender implements MessageService {
     private final SQSSenderProperties properties;
@@ -25,8 +30,9 @@ public class SQSSender implements MessageService {
     @Override
     public Mono<String> sendChangeStateCreditApplication(CreditApplication creditApplication) {
         return Mono.fromCallable(() -> new StatusUpdatedPayload(
-                creditApplication.getId(),
-                creditApplication.getState().name()
+                creditApplication.getClientName(),
+                getCurrencyInstance(Locale.US).format(creditApplication.getAmount()),
+                creditApplication.getState().equals(StateCreditApplication.APPROVED)
             ))
             .map(gson::toJson)
             .flatMap(this::send);

@@ -1,6 +1,7 @@
 package com.crediya.api.openapi;
 
 import com.crediya.api.dto.input.CreateCreditApplicationRequest;
+import com.crediya.api.dto.input.UpdateStateCreditApplication;
 import com.crediya.api.dto.output.creditapplication.CreditApplicationApiResponse;
 import com.crediya.api.dto.output.creditapplication.CreditApplicationPaginationResponse;
 import com.crediya.api.helpers.ApiDocHelper;
@@ -37,6 +38,11 @@ public class CreditApplicationDocApi {
 	public static final String PARAM_DIRECTION_DESCRIPTION = "Sort direction. Default is 'ASC'";
 	public static final String PARAM_STATUS_DESCRIPTION = "Filter by credit application status";
 	public static final String PARAM_AUTO_EVALUATION_DESCRIPTION = "Filter by auto evaluation result";
+	
+	// Update State Credit Application
+	public static final String OPERATION_ID_UPDATE_STATE = "updateStateCreditApplication";
+	public static final String SUMMARY_UPDATE_STATE = "Update the state of an existing credit application";
+	public static final String DESCRIPTION_UPDATED = "Credit application state updated successfully";
 	
 	public void createCreditApplicationDoc(Builder builder) {
 		ApiDocHelper.commonErrorResponse(
@@ -126,6 +132,28 @@ public class CreditApplicationDocApi {
 	public void updateStateCreditApplicationDoc(Builder builder) {
 		ApiDocHelper.commonErrorResponse(
 			builder
+				.summary(SUMMARY_UPDATE_STATE)
+				.operationId(OPERATION_ID_UPDATE_STATE)
+				.tag(TAG_CREDIT_APPLICATION)
+				.requestBody(requestBodyBuilder()
+					.required(true)
+					.content(contentBuilder()
+						.mediaType(MediaType.APPLICATION_JSON_VALUE)
+						.schema(schemaBuilder()
+							.implementation(UpdateStateCreditApplication.class)
+						)
+					)
+				)
+				.response(responseBuilder()
+					.responseCode(String.valueOf(HttpStatus.OK.value()))
+					.description(DESCRIPTION_UPDATED)
+					.content(contentBuilder()
+						.mediaType(MediaType.APPLICATION_JSON_VALUE)
+						.schema(schemaBuilder()
+							.implementation(CreditApplicationApiResponse.class)
+						)
+					)
+				)
 		);
 	}
 	

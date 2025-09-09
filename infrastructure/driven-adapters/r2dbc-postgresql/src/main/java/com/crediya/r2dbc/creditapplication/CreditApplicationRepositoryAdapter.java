@@ -94,6 +94,14 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 			.flatMap(this::mapToEntity);
 	}
 	
+	@Override
+	public Mono<BigDecimal> findTotalMonthlyDebt(String email) {
+		return creditApplicationRepository.findTotalMonthlyDebt(email)
+			.doOnSubscribe(subscription -> log.trace("Calculating total monthly debt for email: {}", email))
+			.defaultIfEmpty(BigDecimal.ZERO)
+			.doOnSuccess(totalDebt -> log.info("Total monthly debt for email {}: {}", email, totalDebt));
+	}
+	
 	private Mono<CreditApplication> mapToEntity(CreditApplicationData data) {
 		if (data == null) {
 			return Mono.empty();

@@ -3,7 +3,7 @@ package com.crediya.usecase.updatestatecreditapplication;
 import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
-import com.crediya.model.creditapplication.gateways.MessageService;
+import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.exceptions.creditapplication.CreditApplicationNotFoundException;
 import com.crediya.model.exceptions.statecreditapplication.InvalidStateCreditApplication;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class UpdateStateCreditApplicationUseCaseTest {
     private CreditApplicationRepository repository;
 
     @Mock
-    private MessageService messageService;
+    private MessageChangeStatusService messageChangeStatusService;
 
     private CreditApplication creditApplication;
 
@@ -52,12 +52,12 @@ class UpdateStateCreditApplicationUseCaseTest {
                 .build();
         when(repository.findById(1L)).thenReturn(Mono.just(creditApplication));
         when(repository.saveCreditApplication(any(CreditApplication.class))).thenReturn(Mono.just(updated));
-        when(messageService.sendChangeStateCreditApplication(any(CreditApplication.class))).thenReturn(Mono.empty());
+        when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class))).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(1L, StateCreditApplication.APPROVED))
                 .verifyComplete();
         verify(repository, times(1)).saveCreditApplication(any(CreditApplication.class));
-        verify(messageService).sendChangeStateCreditApplication(any(CreditApplication.class));
+        verify(messageChangeStatusService).sendChangeStateCreditApplication(any(CreditApplication.class));
     }
 
     @Test
@@ -109,7 +109,7 @@ class UpdateStateCreditApplicationUseCaseTest {
     void execute_errorOnSendMessage_shouldRollbackState() {
         when(repository.findById(1L)).thenReturn(Mono.just(creditApplication));
         when(repository.saveCreditApplication(any(CreditApplication.class))).thenReturn(Mono.just(creditApplication));
-        when(messageService.sendChangeStateCreditApplication(any(CreditApplication.class))).thenReturn(Mono.error(new RuntimeException("Error al enviar mensaje")));
+        when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class))).thenReturn(Mono.error(new RuntimeException("Error al enviar mensaje")));
 
         StepVerifier.create(useCase.execute(1L, StateCreditApplication.REJECTED))
                 .expectError(RuntimeException.class)

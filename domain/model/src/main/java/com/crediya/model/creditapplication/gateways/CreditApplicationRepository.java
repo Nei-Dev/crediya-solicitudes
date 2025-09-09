@@ -6,6 +6,8 @@ import com.crediya.model.creditapplication.CreditApplicationSummary;
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 public interface CreditApplicationRepository {
 	
 	Mono<CreditApplication> saveCreditApplication(CreditApplication creditApplication);
@@ -13,5 +15,7 @@ public interface CreditApplicationRepository {
 	Mono<PaginationResponse<CreditApplicationSummary>> getAllApplications(PaginationCreditApplicationFilter filter);
 	
 	Mono<CreditApplication> findById(Long id);
+	
+	Mono<BigDecimal> findTotalMonthlyDebt(String email);
 	
 }

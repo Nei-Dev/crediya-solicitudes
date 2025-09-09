@@ -30,5 +30,7 @@ include ':token-service'
 project(':token-service').projectDir = file('./infrastructure/driven-adapters/token-service')
 include ':metrics'
 project(':metrics').projectDir = file('./infrastructure/helpers/metrics')
-include ':sqs-sender'
-project(':sqs-sender').projectDir = file('./infrastructure/driven-adapters/sqs-sender')
+include ':sqs-update-state-sender'
+project(':sqs-update-state-sender').projectDir = file('./infrastructure/driven-adapters/sqs-update-state-sender')
+include ':sqs-debt-capacity-sender'
+project(':sqs-debt-capacity-sender').projectDir = file('./infrastructure/driven-adapters/sqs-debt-capacity-sender')

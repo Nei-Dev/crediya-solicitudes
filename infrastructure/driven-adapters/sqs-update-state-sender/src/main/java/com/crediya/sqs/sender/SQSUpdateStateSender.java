@@ -2,8 +2,8 @@ package com.crediya.sqs.sender;
 
 import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.StateCreditApplication;
-import com.crediya.model.creditapplication.gateways.MessageService;
-import com.crediya.sqs.sender.config.SQSSenderProperties;
+import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
+import com.crediya.sqs.sender.config.SQSUpdateStateSenderProperties;
 import com.crediya.sqs.sender.dto.creditapplication.StatusUpdatedPayload;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ import static java.text.NumberFormat.getCurrencyInstance;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SQSSender implements MessageService {
-    private final SQSSenderProperties properties;
+public class SQSUpdateStateSender implements MessageChangeStatusService {
+    private final SQSUpdateStateSenderProperties properties;
     private final SqsAsyncClient client;
     
     private final Gson gson = new Gson();

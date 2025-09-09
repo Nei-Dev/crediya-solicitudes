@@ -14,7 +14,18 @@ public class CreditApplicationQueryBuilder {
     private SortDirection sortDirection = SortDirection.ASC;
 
     public CreditApplicationQueryBuilder selectPaginatedFields() {
-        this.projection = "app.amount, app.term, app.email, app.client_name AS clientName, ct.name AS creditType, ct.interest_rate AS interestRate, st.name AS stateApplication, app.client_salary_base AS salaryBase, ROUND((app.amount + (app.amount * (ct.interest_rate / 100) * (app.term / 12.0))) / app.term, 2) AS monthlyAmount";
+        // monthlyAmount calculation based on the formula for an amortizing loan
+        this.projection = """
+            app.amount,
+            app.term,
+            app.email,
+            app.client_name AS clientName,
+            ct.name AS creditType,
+            ct.interest_rate AS interestRate,
+            st.name AS stateApplication,
+            app.client_salary_base AS salaryBase,
+            ROUND(app.amount * (((ct.interest_rate / 100) / 12) * (1 + ((ct.interest_rate / 100) / 12))**app.term) / ((1 + ((ct.interest_rate / 100) / 12))**app.term - 1), 2) AS monthlyAmount
+        """;
         this.withOrder = true;
         this.withPagination = true;
         return this;

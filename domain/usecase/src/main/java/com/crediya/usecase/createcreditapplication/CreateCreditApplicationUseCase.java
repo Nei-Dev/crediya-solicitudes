@@ -1,14 +1,18 @@
 package com.crediya.usecase.createcreditapplication;
 
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.DebtCapacityCredit;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
+import com.crediya.model.creditapplication.gateways.MessageDebtCapacityService;
 import com.crediya.model.creditapplication.ports.ICreateCreditApplicationUseCase;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.exceptions.credittype.CreditTypeNotFoundException;
 import com.crediya.model.exceptions.credittype.InvalidCreditTypeException;
+import com.crediya.model.helpers.CalculateAmortizingLoan;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -23,6 +27,7 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
 
     private final CreditApplicationRepository creditApplicationRepository;
     private final CreditTypeRepository creditTypeRepository;
+    private final MessageDebtCapacityService messageDebtCapacityService;
     
     @Override
     public Mono<CreditApplication> execute(CreditApplication creditApplication) {
@@ -39,7 +44,8 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
             .flatMap(this::validateIdentification)
             .flatMap(this::validateCreditType)
             .flatMap(this::setPendingState)
-            .flatMap(creditApplicationRepository::saveCreditApplication);
+            .flatMap(creditApplicationRepository::saveCreditApplication)
+            .doOnSuccess(this::sendMessageDebtCapacity);
     }
 
     private Mono<CreditApplication> validateAmountRequested(CreditApplication creditApplication) {
@@ -96,5 +102,22 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
     private Mono<CreditApplication> setPendingState(CreditApplication creditApplication) {
         creditApplication.setState(PENDING);
         return Mono.just(creditApplication);
+    }
+    
+    private void sendMessageDebtCapacity(CreditApplication creditApplication) {
+        creditApplicationRepository.findTotalMonthlyDebt(creditApplication.getEmail())
+            .flatMap(monthlyDebt -> creditTypeRepository.findById(creditApplication.getIdCreditType())
+                .flatMap(ct -> messageDebtCapacityService.sendChangeStateCreditApplication(new DebtCapacityCredit(
+                    creditApplication.getClientSalaryBase(),
+                    CalculateAmortizingLoan.apply(
+                        creditApplication.getAmount(),
+                        ct.getInterestRate(),
+                        creditApplication.getTerm()
+                    ),
+                    monthlyDebt
+                )))
+            )
+            .subscribeOn(Schedulers.boundedElastic())
+            .subscribe();
     }
 }

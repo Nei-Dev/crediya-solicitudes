@@ -2,7 +2,7 @@ package com.crediya.api.config;
 
 import com.crediya.model.auth.gateways.AuthService;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
-import com.crediya.model.creditapplication.gateways.MessageService;
+import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.usecase.auth.AuthUseCase;
 import com.crediya.usecase.createcreditapplication.CreateCreditApplicationUseCase;
@@ -39,8 +39,10 @@ public class UseCaseConfig {
 	@Bean
 	public UpdateStateCreditApplicationUseCase updateStateCreditApplicationUseCase(
 		CreditApplicationRepository repository,
-		MessageService messageService
+		MessageChangeStatusService messageChangeStatusService
 	) {
-		return new UpdateStateCreditApplicationUseCase(repository, messageService);
+		return new UpdateStateCreditApplicationUseCase(repository,
+			messageChangeStatusService
+		);
 	}
 }

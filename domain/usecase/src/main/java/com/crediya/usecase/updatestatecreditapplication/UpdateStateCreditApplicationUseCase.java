@@ -2,7 +2,7 @@ package com.crediya.usecase.updatestatecreditapplication;
 
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
-import com.crediya.model.creditapplication.gateways.MessageService;
+import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.creditapplication.ports.IUpdateStateCreditApplicationUseCase;
 import com.crediya.model.exceptions.creditapplication.CreditApplicationNotFoundException;
 import com.crediya.model.exceptions.statecreditapplication.InvalidStateCreditApplication;
@@ -18,7 +18,7 @@ import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessa
 public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditApplicationUseCase {
 	
 	private final CreditApplicationRepository repository;
-	private final MessageService messageService;
+	private final MessageChangeStatusService messageChangeStatusService;
 	
 	@Override
 	public Mono<Void> execute(Long idCreditApplication, StateCreditApplication newState) {
@@ -27,13 +27,13 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 				.flatMap(repository::findById)
 				.switchIfEmpty(Mono.error(new CreditApplicationNotFoundException(CREDIT_APPLICATION_NOT_FOUND)))
 				.flatMap(creditApplication -> {
-					if (creditApplication.getState() != StateCreditApplication.PENDING) {
+					if (creditApplication.getState() == StateCreditApplication.APPROVED || creditApplication.getState() == StateCreditApplication.REJECTED) {
 						return Mono.error(new InvalidStateCreditApplication(STATE_CANNOT_BE_MODIFIED));
 					}
 					StateCreditApplication previousState = creditApplication.getState();
 					creditApplication.setState(validState);
 					return repository.saveCreditApplication(creditApplication)
-						.flatMap(saved -> messageService.sendChangeStateCreditApplication(saved)
+						.flatMap(saved -> messageChangeStatusService.sendChangeStateCreditApplication(saved)
 							.onErrorResume(ex -> {
 									creditApplication.setState(previousState);
 									return repository.saveCreditApplication(creditApplication)

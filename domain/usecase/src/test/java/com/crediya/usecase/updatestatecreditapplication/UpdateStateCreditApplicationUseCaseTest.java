@@ -19,7 +19,6 @@ import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.CR
 import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.INVALID_ID_CREDIT_APPLICATION;
 import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_CANNOT_BE_MODIFIED;
 import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_INVALID;
-import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_NOT_BLANK;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -78,7 +77,7 @@ class UpdateStateCreditApplicationUseCaseTest {
     @Test
     void execute_nullState_shouldThrowException() {
         StepVerifier.create(useCase.execute(1L, null))
-                .expectErrorMatches(e -> e instanceof InvalidStateCreditApplication && e.getMessage().equals(STATE_NOT_BLANK))
+                .expectErrorMatches(e -> e instanceof InvalidStateCreditApplication && e.getMessage().equals(STATE_INVALID))
                 .verify();
     }
 

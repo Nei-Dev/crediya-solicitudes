@@ -11,7 +11,8 @@ import reactor.core.publisher.Mono;
 
 import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.CREDIT_APPLICATION_NOT_FOUND;
 import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.INVALID_ID_CREDIT_APPLICATION;
-import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.*;
+import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_CANNOT_BE_MODIFIED;
+import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_INVALID;
 
 @RequiredArgsConstructor
 public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditApplicationUseCase {
@@ -53,7 +54,7 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 	
 	private Mono<StateCreditApplication> validateState(StateCreditApplication state) {
 		return Mono.justOrEmpty(state)
-			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(STATE_NOT_BLANK)))
+			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(STATE_INVALID)))
 			.filter(s -> s != StateCreditApplication.PENDING)
 			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(STATE_INVALID)));
 	}

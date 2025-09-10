@@ -2,6 +2,7 @@ package com.crediya.usecase.createcreditapplication;
 
 import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
+import com.crediya.model.creditapplication.gateways.MessageDebtCapacityService;
 import com.crediya.model.credittype.CreditType;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
@@ -21,7 +22,7 @@ import java.util.Objects;
 
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CreateCreditApplicationUseCaseTest {
@@ -34,6 +35,9 @@ class CreateCreditApplicationUseCaseTest {
 
     @Mock
     private CreditTypeRepository creditTypeRepository;
+    
+    @Mock
+    private MessageDebtCapacityService messageDebtCapacityService;
     
     private CreditApplication creditApplication;
     
@@ -199,5 +203,40 @@ class CreateCreditApplicationUseCaseTest {
         StepVerifier.create(useCase.execute(creditApplication))
             .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_IDENTIFICATION))
             .verify();
+    }
+    
+    @Test
+    void execute_autoValidationCreditType_shouldSendDebtCapacityMessage() {
+        CreditType autoValidationCreditType = CreditType.builder()
+            .idCreditType(1L)
+            .name("Personal Loan")
+            .minimumAmount(BigDecimal.valueOf(500))
+            .maximumAmount(BigDecimal.valueOf(5000))
+            .interestRate(BigDecimal.valueOf(0.05))
+            .autoValidation(true)
+            .build();
+        CreditApplication creditApplicationWithSalary = CreditApplication.builder()
+            .amount(BigDecimal.valueOf(1000))
+            .term(12)
+            .idCreditType(1L)
+            .email("test@example.com")
+            .identification("123456789")
+            .clientSalaryBase(BigDecimal.valueOf(2000))
+            .build();
+        when(creditTypeRepository.findById(any(Long.class)))
+            .thenReturn(Mono.just(autoValidationCreditType));
+        when(creditApplicationRepository.saveCreditApplication(any(CreditApplication.class)))
+            .thenReturn(Mono.just(creditApplicationWithSalary));
+        when(creditApplicationRepository.findTotalMonthlyDebt(any(String.class)))
+            .thenReturn(Mono.just(BigDecimal.valueOf(100)));
+        when(messageDebtCapacityService.sendChangeStateCreditApplication(any())).thenReturn(Mono.empty());
+
+        StepVerifier.create(useCase.execute(creditApplicationWithSalary))
+            .expectNextMatches(result -> result.getAmount().equals(creditApplicationWithSalary.getAmount()))
+            .verifyComplete();
+        // Esperar un poco para la suscripción asíncrona
+        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        verify(messageDebtCapacityService, times(1))
+            .sendChangeStateCreditApplication(any());
     }
 }

@@ -6,6 +6,7 @@ import com.crediya.model.creditapplication.CreditApplicationSummary;
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
+import com.crediya.model.helpers.CalculateAmortizingLoan;
 import com.crediya.model.helpers.SortDirection;
 import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.exceptions.StateNotFoundException;
@@ -96,9 +97,15 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	
 	@Override
 	public Mono<BigDecimal> findTotalMonthlyDebt(String email) {
-		return creditApplicationRepository.findTotalMonthlyDebt(email)
+		return creditApplicationRepository.findAllApprovedByEmail(email)
 			.doOnSubscribe(subscription -> log.trace("Calculating total monthly debt for email: {}", email))
-			.defaultIfEmpty(BigDecimal.ZERO)
+			.map(data -> CalculateAmortizingLoan.apply(
+				data.getAmount(),
+				data.getInterestRate(),
+				data.getTerm())
+			)
+			.reduce(BigDecimal.ZERO, BigDecimal::add)
+			.doOnError(error -> log.error("Error calculating total monthly debt for email {}: {}", email, error.getMessage()))
 			.doOnSuccess(totalDebt -> log.info("Total monthly debt for email {}: {}", email, totalDebt));
 	}
 	

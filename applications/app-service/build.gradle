@@ -1,6 +1,7 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':sqs-credit-evaluation-listener')
 	implementation project(':sqs-update-state-sender')
 	implementation project(':sqs-debt-capacity-sender')
 	implementation project(':metrics')

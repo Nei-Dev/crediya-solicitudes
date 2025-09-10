@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 
 public record DebtCapacityCredit (
 
-	BigDecimal totalIncome,
+	Long idCreditApplication,
+	BigDecimal salaryBase,
+	BigDecimal amount,
 	BigDecimal monthlyNewLoanPayment,
 	BigDecimal totalMonthlyDebtPayments
 

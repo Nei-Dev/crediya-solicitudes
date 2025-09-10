@@ -24,7 +24,7 @@ public class CreditApplicationQueryBuilder {
             ct.interest_rate AS interestRate,
             st.name AS stateApplication,
             app.client_salary_base AS salaryBase,
-            ROUND(app.amount * (((ct.interest_rate / 100) / 12) * (1 + ((ct.interest_rate / 100) / 12))**app.term) / ((1 + ((ct.interest_rate / 100) / 12))**app.term - 1), 2) AS monthlyAmount
+            ROUND(app.amount * (((ct.interest_rate / 100) / 12) * POW(1 + ((ct.interest_rate / 100) / 12), app.term)) / (POW(1 + ((ct.interest_rate / 100) / 12), app.term) - 1), 2) AS monthlyAmount
         """;
         this.withOrder = true;
         this.withPagination = true;

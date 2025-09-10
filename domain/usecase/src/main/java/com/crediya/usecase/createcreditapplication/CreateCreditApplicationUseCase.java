@@ -5,6 +5,7 @@ import com.crediya.model.creditapplication.DebtCapacityCredit;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.creditapplication.gateways.MessageDebtCapacityService;
 import com.crediya.model.creditapplication.ports.ICreateCreditApplicationUseCase;
+import com.crediya.model.credittype.CreditType;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.exceptions.credittype.CreditTypeNotFoundException;
@@ -105,10 +106,13 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
     }
     
     private void sendMessageDebtCapacity(CreditApplication creditApplication) {
-        creditApplicationRepository.findTotalMonthlyDebt(creditApplication.getEmail())
-            .flatMap(monthlyDebt -> creditTypeRepository.findById(creditApplication.getIdCreditType())
-                .flatMap(ct -> messageDebtCapacityService.sendChangeStateCreditApplication(new DebtCapacityCredit(
+        creditTypeRepository.findById(creditApplication.getIdCreditType())
+            .filter(CreditType::getAutoValidation)
+            .flatMap(ct -> creditApplicationRepository.findTotalMonthlyDebt(creditApplication.getEmail())
+                .flatMap(monthlyDebt -> messageDebtCapacityService.sendChangeStateCreditApplication(new DebtCapacityCredit(
+                    creditApplication.getId(),
                     creditApplication.getClientSalaryBase(),
+                    creditApplication.getAmount(),
                     CalculateAmortizingLoan.apply(
                         creditApplication.getAmount(),
                         ct.getInterestRate(),

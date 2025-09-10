@@ -11,11 +11,11 @@ public interface CreditApplicationReactiveRepository extends ReactiveCrudReposit
 
 	@Query("""
 		SELECT
-			app.id_application AS idCreditApplication,
+			app.id_application AS id_credit_application,
 			app.amount AS amount,
 			app.term AS term,
-			ct.interest_rate AS interestRate,
-			app.client_salary_base AS salaryBase
+			ct.interest_rate AS interest_rate,
+			app.client_salary_base AS salary_base
 		FROM application app
 		JOIN state st ON app.id_state = st.id_state
 		JOIN credit_type ct ON ct.id_credit_type = app.id_credit_type

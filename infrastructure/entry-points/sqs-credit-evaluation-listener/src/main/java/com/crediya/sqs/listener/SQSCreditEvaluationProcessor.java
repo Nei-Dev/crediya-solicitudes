@@ -23,10 +23,10 @@ public class SQSCreditEvaluationProcessor implements Function<Message, Mono<Void
     public Mono<Void> apply(Message message) {
         
         ResultCreditEvaluation result = gson.fromJson(message.body(), ResultCreditEvaluation.class);
-        return Mono.fromCallable(() -> updateStateCreditApplicationUseCase.execute(
+        return updateStateCreditApplicationUseCase.execute(
             result.idCreditApplication(),
             StateCreditApplication.valueOf(result.result())
-        )).then();
+        ).then();
         
     }
 }

@@ -2,12 +2,10 @@ package com.crediya.r2dbc.projections;
 
 import java.math.BigDecimal;
 
-public interface CreditApplicationDataDebt {
-	
-	String getIdCreditApplication();
-	BigDecimal getAmount();
-	Integer getTerm();
-	BigDecimal getInterestRate();
-	BigDecimal getSalaryBase();
-	
-}
+public record CreditApplicationDataDebt (
+	Long id_credit_application,
+	BigDecimal amount,
+	Integer term,
+	BigDecimal interest_rate,
+	BigDecimal salary_base
+) {}

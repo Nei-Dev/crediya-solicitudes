@@ -48,7 +48,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				.flatMap(stateData -> {
 					dataToSave.setIdState(stateData.getId());
 					return creditApplicationRepository.save(dataToSave)
-						.doOnSubscribe(subscription -> log.trace("Creating credit application in the database"));
+						.doOnSubscribe(subscription -> log.trace("Saving credit application in the database"));
 				})
 				.flatMap(this::mapToEntity)
 		);
@@ -100,9 +100,9 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 		return creditApplicationRepository.findAllApprovedByEmail(email)
 			.doOnSubscribe(subscription -> log.trace("Calculating total monthly debt for email: {}", email))
 			.map(data -> CalculateAmortizingLoan.apply(
-				data.getAmount(),
-				data.getInterestRate(),
-				data.getTerm())
+				data.amount(),
+				data.interest_rate(),
+				data.term())
 			)
 			.reduce(BigDecimal.ZERO, BigDecimal::add)
 			.doOnError(error -> log.error("Error calculating total monthly debt for email {}: {}", email, error.getMessage()))

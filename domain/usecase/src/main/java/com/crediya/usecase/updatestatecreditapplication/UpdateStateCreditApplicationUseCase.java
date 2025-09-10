@@ -9,10 +9,13 @@ import com.crediya.model.exceptions.statecreditapplication.InvalidStateCreditApp
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.CREDIT_APPLICATION_NOT_FOUND;
 import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.INVALID_ID_CREDIT_APPLICATION;
 import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_CANNOT_BE_MODIFIED;
 import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_INVALID;
+import static com.crediya.model.creditapplication.StateCreditApplication.*;
 
 @RequiredArgsConstructor
 public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditApplicationUseCase {
@@ -33,6 +36,8 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 					StateCreditApplication previousState = creditApplication.getState();
 					creditApplication.setState(validState);
 					return repository.saveCreditApplication(creditApplication)
+						.filter(ca -> List.of(APPROVED, REJECTED).contains(ca.getState()))
+						.switchIfEmpty(Mono.empty())
 						.flatMap(saved -> messageChangeStatusService.sendChangeStateCreditApplication(saved)
 							.onErrorResume(ex -> {
 									creditApplication.setState(previousState);
@@ -41,7 +46,8 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 								}
 							)
 						);
-				}))
+				})
+			)
 			.then();
 	}
 	
@@ -55,7 +61,7 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 	private Mono<StateCreditApplication> validateState(StateCreditApplication state) {
 		return Mono.justOrEmpty(state)
 			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(STATE_INVALID)))
-			.filter(s -> s != StateCreditApplication.PENDING)
+			.filter(s -> s != PENDING)
 			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(STATE_INVALID)));
 	}
 }

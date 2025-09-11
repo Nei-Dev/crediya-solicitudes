@@ -32,7 +32,7 @@ public class CalculateCapacityUseCase implements ICalculateCapacityUseCase {
 	
 	@Override
 	public Mono<Void> execute(Long idCreditApplication) {
-		return Mono.just(idCreditApplication)
+		return Mono.justOrEmpty(idCreditApplication)
 			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(INVALID_ID_CREDIT_APPLICATION)))
 			.flatMap(creditApplicationRepository::findById)
 			.switchIfEmpty(Mono.error(new CreditApplicationNotFoundException(CREDIT_APPLICATION_NOT_FOUND)))

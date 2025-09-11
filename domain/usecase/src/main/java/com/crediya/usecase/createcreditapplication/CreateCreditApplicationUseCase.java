@@ -18,6 +18,7 @@ import reactor.core.scheduler.Schedulers;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.CREDIT_TYPE_NOT_FOUND;
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.*;
 import static com.crediya.model.constants.Regex.EMAIL;
 import static com.crediya.model.constants.Regex.IDENTIFICATION;
@@ -113,7 +114,7 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
                     creditApplication.getId(),
                     creditApplication.getClientSalaryBase(),
                     creditApplication.getAmount(),
-                    CalculateAmortizingLoan.apply(
+                    CalculateAmortizingLoan.calculateMonthlyPayment(
                         creditApplication.getAmount(),
                         ct.getInterestRate(),
                         creditApplication.getTerm()

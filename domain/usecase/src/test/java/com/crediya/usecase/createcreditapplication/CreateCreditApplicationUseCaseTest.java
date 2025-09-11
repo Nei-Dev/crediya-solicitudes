@@ -345,7 +345,7 @@ class CreateCreditApplicationUseCaseTest {
             .thenReturn(Mono.just(creditApplicationWithSalary));
         
         try (MockedStatic<CalculateAmortizingLoan> mocked = mockStatic(CalculateAmortizingLoan.class)) {
-            mocked.when(() -> CalculateAmortizingLoan.apply(any(BigDecimal.class), eq(BigDecimal.ONE), eq(2)))
+            mocked.when(() -> CalculateAmortizingLoan.calculateMonthlyPayment(any(BigDecimal.class), eq(BigDecimal.ONE), eq(2)))
                 .thenReturn(BigDecimal.valueOf(85.61));
             StepVerifier.create(useCase.execute(creditApplicationWithSalary))
                 .expectNextMatches(result -> result.getAmount().equals(creditApplicationWithSalary.getAmount()))

@@ -99,7 +99,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 	public Mono<BigDecimal> findTotalMonthlyDebt(String email) {
 		return creditApplicationRepository.findAllApprovedByEmail(email)
 			.doOnSubscribe(subscription -> log.trace("Calculating total monthly debt for email: {}", email))
-			.map(data -> CalculateAmortizingLoan.apply(
+			.map(data -> CalculateAmortizingLoan.calculateMonthlyPayment(
 				data.amount(),
 				data.interest_rate(),
 				data.term())

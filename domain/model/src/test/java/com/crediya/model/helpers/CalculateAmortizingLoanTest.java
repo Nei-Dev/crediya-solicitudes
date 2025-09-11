@@ -14,7 +14,7 @@ class CalculateAmortizingLoanTest {
         BigDecimal interest = BigDecimal.ZERO;
         int term = 12;
         
-		BigDecimal result = CalculateAmortizingLoan.apply(amount, interest, term);
+		BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
         
         assertThat(result).isEqualByComparingTo(new BigDecimal("100.00"));
     }
@@ -25,7 +25,7 @@ class CalculateAmortizingLoanTest {
         BigDecimal interest = BigDecimal.ZERO;
         int term = 0;
         
-        BigDecimal result = CalculateAmortizingLoan.apply(amount, interest, term);
+        BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
         
         assertThat(result).isEqualByComparingTo(BigDecimal.ZERO);
     }
@@ -36,7 +36,7 @@ class CalculateAmortizingLoanTest {
         BigDecimal interest = new BigDecimal(12);
         int term = 12;
         
-        BigDecimal result = CalculateAmortizingLoan.apply(amount, interest, term);
+        BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
         
         assertThat(result).isEqualByComparingTo(new BigDecimal("888.49"));
     }
@@ -47,7 +47,7 @@ class CalculateAmortizingLoanTest {
         BigDecimal interest = new BigDecimal(10);
         int term = 12;
         
-        BigDecimal result = CalculateAmortizingLoan.apply(amount, interest, term);
+        BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
         
         assertThat(result).isEqualByComparingTo(BigDecimal.ZERO);
     }
@@ -58,7 +58,7 @@ class CalculateAmortizingLoanTest {
         BigDecimal interest = BigDecimal.ZERO;
         int term = 0;
         
-        BigDecimal result = CalculateAmortizingLoan.apply(amount, interest, term);
+        BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
         
         assertThat(result).isEqualByComparingTo(BigDecimal.ZERO);
     }

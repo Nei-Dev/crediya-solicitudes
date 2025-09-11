@@ -55,7 +55,7 @@ public class CalculateCapacityUseCase implements ICalculateCapacityUseCase {
 					creditApplication.getId(),
 					creditApplication.getClientSalaryBase(),
 					creditApplication.getAmount(),
-					CalculateAmortizingLoan.apply(
+					CalculateAmortizingLoan.calculateMonthlyPayment(
 						creditApplication.getAmount(),
 						ct.getInterestRate(),
 						creditApplication.getTerm()

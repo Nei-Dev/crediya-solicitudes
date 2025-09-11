@@ -1,6 +1,7 @@
 package com.crediya.sqs.sender;
 
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.Installment;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.sqs.sender.config.SQSUpdateStateSenderProperties;
@@ -14,6 +15,7 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+import java.util.List;
 import java.util.Locale;
 
 import static java.text.NumberFormat.getCurrencyInstance;
@@ -28,11 +30,12 @@ public class SQSUpdateStateSender implements MessageChangeStatusService {
     private final Gson gson = new Gson();
     
     @Override
-    public Mono<String> sendChangeStateCreditApplication(CreditApplication creditApplication) {
+    public Mono<String> sendChangeStateCreditApplication(CreditApplication creditApplication, List<Installment> paymentPlan) {
         return Mono.fromCallable(() -> new StatusUpdatedPayload(
                 creditApplication.getClientName(),
                 getCurrencyInstance(Locale.US).format(creditApplication.getAmount()),
-                creditApplication.getState().equals(StateCreditApplication.APPROVED)
+                creditApplication.getState().equals(StateCreditApplication.APPROVED),
+                paymentPlan
             ))
             .map(gson::toJson)
             .flatMap(this::send);

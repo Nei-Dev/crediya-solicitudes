@@ -61,6 +61,7 @@ class CreateCreditApplicationUseCaseTest {
             .name("Personal Loan")
             .minimumAmount(BigDecimal.valueOf(500))
             .maximumAmount(BigDecimal.valueOf(5000))
+            .autoValidation(false)
             .build();
     }
     
@@ -79,6 +80,8 @@ class CreateCreditApplicationUseCaseTest {
                 .thenReturn(Mono.just(creditTypeRegistered));
         when(creditApplicationRepository.saveCreditApplication(any(CreditApplication.class)))
                 .thenReturn(Mono.just(creditApplicationSaved));
+        lenient().when(creditApplicationRepository.findTotalMonthlyDebt(creditApplicationSaved.getEmail()))
+            .thenReturn(Mono.just(BigDecimal.valueOf(100)));
 
         StepVerifier.create(useCase.execute(creditApplication))
                 .expectNextMatches(result -> Objects.nonNull(result.getId()) && result.getId().equals(creditApplicationSaved.getId())

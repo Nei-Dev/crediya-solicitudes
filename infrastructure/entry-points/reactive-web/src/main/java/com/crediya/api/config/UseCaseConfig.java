@@ -45,11 +45,13 @@ public class UseCaseConfig {
 	
 	@Bean
 	public UpdateStateCreditApplicationUseCase updateStateCreditApplicationUseCase(
-		CreditApplicationRepository repository,
+		CreditApplicationRepository creditApplicationRepository,
+		CreditTypeRepository creditTypeRepository,
 		MessageChangeStatusService messageChangeStatusService
 	) {
 		return new UpdateStateCreditApplicationUseCase(
-			repository,
+			creditApplicationRepository,
+			creditTypeRepository,
 			messageChangeStatusService
 		);
 	}

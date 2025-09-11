@@ -1,6 +1,7 @@
 package com.crediya.usecase.updatestatecreditapplication;
 
 import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.Installment;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
@@ -64,11 +65,11 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 	private Mono<Void> sendChangeMessage(CreditApplication creditApplication, StateCreditApplication previousState) {
 		return creditTypeRepository.findById(creditApplication.getIdCreditType())
 			.switchIfEmpty(Mono.error(new CreditTypeNotFoundException(CREDIT_TYPE_NOT_FOUND)))
-			.flatMap(creditType -> Mono.just(CalculateAmortizingLoan.generatePaymentPlan(
+			.flatMap(creditType -> creditApplication.getState().equals(APPROVED) ? Mono.just(CalculateAmortizingLoan.generatePaymentPlan(
 				creditApplication.getAmount(),
 				creditType.getInterestRate(),
 				creditApplication.getTerm()
-			)))
+			)) : Mono.just(List.<Installment>of()))
 			.flatMap(paymentPlan -> messageChangeStatusService.sendChangeStateCreditApplication(creditApplication, paymentPlan))
 			.then()
 			.onErrorResume(ex -> rollbackState(creditApplication, previousState, ex));

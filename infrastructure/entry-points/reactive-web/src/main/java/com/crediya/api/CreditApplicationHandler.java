@@ -14,9 +14,10 @@ import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.ports.ICreateCreditApplicationUseCase;
 import com.crediya.model.creditapplication.ports.IGetCreditApplicationPaginatedUseCase;
+import com.crediya.model.creditapplication.ports.IUpdateStateCreditApplicationUseCase;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.helpers.SortDirection;
-import com.crediya.usecase.updatestatecreditapplication.UpdateStateCreditApplicationUseCase;
+import com.crediya.usecase.calculatecapacity.CalculateCapacityUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,8 +28,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import static com.crediya.api.constants.PaginationParams.*;
-import static com.crediya.api.constants.ResponseMessage.CREDIT_APPLICATION_CREATED;
-import static com.crediya.api.constants.ResponseMessage.CREDIT_APPLICATION_UPDATED;
+import static com.crediya.api.constants.PathVariable.ID_CREDIT_APPLICATION;
+import static com.crediya.api.constants.ResponseMessage.*;
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.NULL_CREDIT_APPLICATION;
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.USER_NOT_MATCH;
 
@@ -41,7 +42,8 @@ public class CreditApplicationHandler {
 	private final IAuthUseCase authUseCase;
 	private final ICreateCreditApplicationUseCase createCreditApplicationUseCase;
 	private final IGetCreditApplicationPaginatedUseCase getCreditApplicationPaginatedUseCase;
-	private final UpdateStateCreditApplicationUseCase updateStateCreditApplicationUseCase;
+	private final IUpdateStateCreditApplicationUseCase updateStateCreditApplicationUseCase;
+	private final CalculateCapacityUseCase calculateCapacityApplicationUseCase;
 	
 	public Mono<ServerResponse> createApplication(ServerRequest serverRequest) {
 		return serverRequest.bodyToMono(CreateCreditApplicationRequest.class)
@@ -85,6 +87,16 @@ public class CreditApplicationHandler {
 			.flatMap(req -> updateStateCreditApplicationUseCase.execute(req.idCreditApplication(), sanitizeStatus(req.state())))
 			.then(ServerResponse.ok().bodyValue(
 				ApiResponse.of(CREDIT_APPLICATION_UPDATED)
+			));
+	}
+	
+	public Mono<ServerResponse> calculateCapacityCreditApplication(ServerRequest serverRequest) {
+		return Mono.fromCallable(() -> serverRequest.pathVariable(ID_CREDIT_APPLICATION))
+			.map(Long::parseLong)
+			.doOnSubscribe(subs -> log.trace("Starting calculate capacity credit application request"))
+			.flatMap(calculateCapacityApplicationUseCase::execute)
+			.then(ServerResponse.ok().bodyValue(
+				ApiResponse.of(CAPACITY_CALCULATED)
 			));
 	}
 	

@@ -25,6 +25,7 @@ public class CalculateAmortizingLoan {
 	}
 	
 	private BigDecimal divide(BigDecimal numerator, BigDecimal denominator) {
+		if (denominator.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
 		return numerator.divide(denominator, SCALE, RoundingMode.HALF_UP);
 	}
 }

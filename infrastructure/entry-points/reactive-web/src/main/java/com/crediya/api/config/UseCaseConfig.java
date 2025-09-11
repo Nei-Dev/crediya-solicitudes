@@ -6,6 +6,7 @@ import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.creditapplication.gateways.MessageDebtCapacityService;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
 import com.crediya.usecase.auth.AuthUseCase;
+import com.crediya.usecase.calculatecapacity.CalculateCapacityUseCase;
 import com.crediya.usecase.createcreditapplication.CreateCreditApplicationUseCase;
 import com.crediya.usecase.getcreditapplication.GetCreditApplicationPaginatedUseCase;
 import com.crediya.usecase.updatestatecreditapplication.UpdateStateCreditApplicationUseCase;
@@ -50,6 +51,19 @@ public class UseCaseConfig {
 		return new UpdateStateCreditApplicationUseCase(
 			repository,
 			messageChangeStatusService
+		);
+	}
+	
+	@Bean
+	public CalculateCapacityUseCase calculateCapacityUseCase(
+		CreditApplicationRepository creditApplicationRepository,
+		CreditTypeRepository creditTypeRepository,
+		MessageDebtCapacityService messageDebtCapacityService
+	) {
+		return new CalculateCapacityUseCase(
+			creditApplicationRepository,
+			creditTypeRepository,
+			messageDebtCapacityService
 		);
 	}
 }

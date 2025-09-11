@@ -59,7 +59,9 @@ public class SQSCreditEvaluationListener {
     private Flux<Message> getMessages() {
         return Mono.fromCallable(this::getReceiveMessageRequest)
                 .flatMap(request -> Mono.fromFuture(client.receiveMessage(request)))
-                .doOnNext(response -> log.debug("{} received messages from sqs", response.messages().size()))
+                .doOnNext(response -> {
+                    if (response.hasMessages()) log.debug("{} received messages from sqs", response.messages().size());
+                })
                 .flatMapMany(response -> Flux.fromIterable(response.messages()));
     }
 

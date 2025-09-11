@@ -5,6 +5,7 @@ import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.creditapplication.ports.IUpdateStateCreditApplicationUseCase;
 import com.crediya.model.exceptions.creditapplication.CreditApplicationNotFoundException;
+import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.exceptions.statecreditapplication.InvalidStateCreditApplication;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -53,9 +54,9 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 	
 	private Mono<Long> validateIdCreditApplication(Long idCreditApplication) {
 		return Mono.justOrEmpty(idCreditApplication)
-			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(INVALID_ID_CREDIT_APPLICATION)))
+			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(INVALID_ID_CREDIT_APPLICATION)))
 			.filter(id -> id > 0)
-			.switchIfEmpty(Mono.error(new InvalidStateCreditApplication(INVALID_ID_CREDIT_APPLICATION)));
+			.switchIfEmpty(Mono.error(new InvalidCreditApplicationException(INVALID_ID_CREDIT_APPLICATION)));
 	}
 	
 	private Mono<StateCreditApplication> validateState(StateCreditApplication state) {

@@ -5,6 +5,7 @@ import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.exceptions.creditapplication.CreditApplicationNotFoundException;
+import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.exceptions.statecreditapplication.InvalidStateCreditApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,8 @@ import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.CR
 import static com.crediya.model.constants.CommonCreditApplicationErrorMessage.INVALID_ID_CREDIT_APPLICATION;
 import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_CANNOT_BE_MODIFIED;
 import static com.crediya.model.constants.UpdateStateCreditApplicationErrorMessage.STATE_INVALID;
+import static com.crediya.model.creditapplication.StateCreditApplication.APPROVED;
+import static com.crediya.model.creditapplication.StateCreditApplication.REJECTED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -48,13 +51,13 @@ class UpdateStateCreditApplicationUseCaseTest {
     void execute_validUpdate_shouldUpdateStateAndSendMessage() {
         CreditApplication updated = CreditApplication.builder()
                 .id(1L)
-                .state(StateCreditApplication.APPROVED)
+                .state(APPROVED)
                 .build();
         when(repository.findById(1L)).thenReturn(Mono.just(creditApplication));
         when(repository.saveCreditApplication(any(CreditApplication.class))).thenReturn(Mono.just(updated));
         when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.execute(1L, StateCreditApplication.APPROVED))
+        StepVerifier.create(useCase.execute(1L, APPROVED))
                 .verifyComplete();
         verify(repository, times(1)).saveCreditApplication(any(CreditApplication.class));
         verify(messageChangeStatusService).sendChangeStateCreditApplication(any(CreditApplication.class));
@@ -62,15 +65,15 @@ class UpdateStateCreditApplicationUseCaseTest {
 
     @Test
     void execute_nullId_shouldThrowException() {
-        StepVerifier.create(useCase.execute(null, StateCreditApplication.APPROVED))
-                .expectErrorMatches(e -> e instanceof InvalidStateCreditApplication && e.getMessage().equals(INVALID_ID_CREDIT_APPLICATION))
+        StepVerifier.create(useCase.execute(null, APPROVED))
+                .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_ID_CREDIT_APPLICATION))
                 .verify();
     }
 
     @Test
     void execute_invalidId_shouldThrowException() {
-        StepVerifier.create(useCase.execute(0L, StateCreditApplication.APPROVED))
-                .expectErrorMatches(e -> e instanceof InvalidStateCreditApplication && e.getMessage().equals(INVALID_ID_CREDIT_APPLICATION))
+        StepVerifier.create(useCase.execute(0L, APPROVED))
+                .expectErrorMatches(e -> e instanceof InvalidCreditApplicationException && e.getMessage().equals(INVALID_ID_CREDIT_APPLICATION))
                 .verify();
     }
 
@@ -91,16 +94,22 @@ class UpdateStateCreditApplicationUseCaseTest {
     @Test
     void execute_creditApplicationNotFound_shouldThrowException() {
         when(repository.findById(1L)).thenReturn(Mono.empty());
-        StepVerifier.create(useCase.execute(1L, StateCreditApplication.REJECTED))
+        StepVerifier.create(useCase.execute(1L, REJECTED))
                 .expectErrorMatches(e -> e instanceof CreditApplicationNotFoundException && e.getMessage().equals(CREDIT_APPLICATION_NOT_FOUND))
                 .verify();
     }
 
     @Test
     void execute_stateCannotBeModified_shouldThrowException() {
-        creditApplication.setState(StateCreditApplication.APPROVED);
+        creditApplication.setState(APPROVED);
         when(repository.findById(1L)).thenReturn(Mono.just(creditApplication));
-        StepVerifier.create(useCase.execute(1L, StateCreditApplication.REJECTED))
+        StepVerifier.create(useCase.execute(1L, REJECTED))
+                .expectErrorMatches(e -> e instanceof InvalidStateCreditApplication && e.getMessage().equals(STATE_CANNOT_BE_MODIFIED))
+                .verify();
+        
+        creditApplication.setState(REJECTED);
+        when(repository.findById(1L)).thenReturn(Mono.just(creditApplication));
+        StepVerifier.create(useCase.execute(1L, APPROVED))
                 .expectErrorMatches(e -> e instanceof InvalidStateCreditApplication && e.getMessage().equals(STATE_CANNOT_BE_MODIFIED))
                 .verify();
     }
@@ -111,7 +120,7 @@ class UpdateStateCreditApplicationUseCaseTest {
         when(repository.saveCreditApplication(any(CreditApplication.class))).thenReturn(Mono.just(creditApplication));
         when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class))).thenReturn(Mono.error(new RuntimeException("Error al enviar mensaje")));
 
-        StepVerifier.create(useCase.execute(1L, StateCreditApplication.REJECTED))
+        StepVerifier.create(useCase.execute(1L, REJECTED))
                 .expectError(RuntimeException.class)
                 .verify();
         verify(repository, times(2)).saveCreditApplication(any(CreditApplication.class));

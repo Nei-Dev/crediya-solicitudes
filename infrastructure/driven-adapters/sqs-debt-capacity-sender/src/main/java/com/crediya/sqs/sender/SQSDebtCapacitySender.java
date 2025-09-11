@@ -22,7 +22,7 @@ public class SQSDebtCapacitySender implements MessageDebtCapacityService {
     private final Gson gson = new Gson();
     
     @Override
-    public Mono<String> sendChangeStateCreditApplication(DebtCapacityCredit debtCapacityCredit) {
+    public Mono<String> sendCalculateDebtCapacity(DebtCapacityCredit debtCapacityCredit) {
         return Mono.fromCallable(() -> gson.toJson(debtCapacityCredit))
             .flatMap(this::send);
     }

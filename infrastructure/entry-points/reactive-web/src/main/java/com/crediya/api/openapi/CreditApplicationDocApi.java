@@ -44,6 +44,11 @@ public class CreditApplicationDocApi {
 	public static final String SUMMARY_UPDATE_STATE = "Update the state of an existing credit application";
 	public static final String DESCRIPTION_UPDATED = "Credit application state updated successfully";
 	
+	// Calculate Capacity Credit Application
+	public static final String OPERATION_ID_CALCULATE_CAPACITY = "calculateCapacityCreditApplication";
+	public static final String SUMMARY_CALCULATE_CAPACITY = "Calculate the credit capacity for a credit application";
+	public static final String DESCRIPTION_CAPACITY_CALCULATED = "Credit capacity calculated successfully";
+	
 	public void createCreditApplicationDoc(Builder builder) {
 		ApiDocHelper.commonErrorResponse(
 			builder
@@ -147,6 +152,25 @@ public class CreditApplicationDocApi {
 				.response(responseBuilder()
 					.responseCode(String.valueOf(HttpStatus.OK.value()))
 					.description(DESCRIPTION_UPDATED)
+					.content(contentBuilder()
+						.mediaType(MediaType.APPLICATION_JSON_VALUE)
+						.schema(schemaBuilder()
+							.implementation(CreditApplicationApiResponse.class)
+						)
+					)
+				)
+		);
+	}
+	
+	public void calculateCapacityCreditApplicationDoc(Builder builder) {
+		ApiDocHelper.commonErrorResponse(
+			builder
+				.summary(SUMMARY_CALCULATE_CAPACITY)
+				.operationId(OPERATION_ID_CALCULATE_CAPACITY)
+				.tag(TAG_CREDIT_APPLICATION)
+				.response(responseBuilder()
+					.responseCode(String.valueOf(HttpStatus.OK.value()))
+					.description(DESCRIPTION_CAPACITY_CALCULATED)
 					.content(contentBuilder()
 						.mediaType(MediaType.APPLICATION_JSON_VALUE)
 						.schema(schemaBuilder()

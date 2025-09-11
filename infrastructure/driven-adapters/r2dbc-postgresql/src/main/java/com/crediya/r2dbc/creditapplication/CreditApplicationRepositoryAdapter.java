@@ -105,6 +105,7 @@ public class CreditApplicationRepositoryAdapter implements CreditApplicationRepo
 				data.term())
 			)
 			.reduce(BigDecimal.ZERO, BigDecimal::add)
+			.defaultIfEmpty(BigDecimal.ZERO)
 			.doOnError(error -> log.error("Error calculating total monthly debt for email {}: {}", email, error.getMessage()))
 			.doOnSuccess(totalDebt -> log.info("Total monthly debt for email {}: {}", email, totalDebt));
 	}

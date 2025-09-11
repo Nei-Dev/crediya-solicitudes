@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface MessageDebtCapacityService {
 	
-	Mono<String> sendChangeStateCreditApplication(DebtCapacityCredit debtCapacityCredit);
+	Mono<String> sendCalculateDebtCapacity(DebtCapacityCredit debtCapacityCredit);
 	
 }

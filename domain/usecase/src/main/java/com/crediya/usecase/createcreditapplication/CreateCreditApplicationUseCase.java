@@ -109,7 +109,7 @@ public class CreateCreditApplicationUseCase implements ICreateCreditApplicationU
         creditTypeRepository.findById(creditApplication.getIdCreditType())
             .filter(CreditType::getAutoValidation)
             .flatMap(ct -> creditApplicationRepository.findTotalMonthlyDebt(creditApplication.getEmail())
-                .flatMap(monthlyDebt -> messageDebtCapacityService.sendChangeStateCreditApplication(new DebtCapacityCredit(
+                .flatMap(monthlyDebt -> messageDebtCapacityService.sendCalculateDebtCapacity(new DebtCapacityCredit(
                     creditApplication.getId(),
                     creditApplication.getClientSalaryBase(),
                     creditApplication.getAmount(),

@@ -34,6 +34,11 @@ public class CreditApplicationRouterRest {
                 creditApplicationHandler::updateStateCreditApplication,
                 CreditApplicationDocApi::updateStateCreditApplicationDoc
             )
+            .POST(
+                path.getCalculateCapacityCreditApplication(),
+                creditApplicationHandler::calculateCapacityCreditApplication,
+                CreditApplicationDocApi::calculateCapacityCreditApplicationDoc
+            )
             .build();
     }
 }

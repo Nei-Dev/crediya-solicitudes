@@ -11,6 +11,7 @@ app:
       createApplication: "/api/v1/credit-application"
       listCreditApplication: "/api/v1/credit-application"
       updateStateCreditApplication: "/api/v1/credit-application/update-state"
+      calculateCapacityCreditApplication: "/api/v1/calculate-capacity/{idCreditApplication}"
 adapters:
   r2dbc:
     host: ${DB_HOST:localhost}

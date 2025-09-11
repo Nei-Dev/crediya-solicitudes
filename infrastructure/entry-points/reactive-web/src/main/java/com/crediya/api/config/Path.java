@@ -12,5 +12,6 @@ public class Path {
 	private String createApplication;
 	private String listCreditApplication;
 	private String updateStateCreditApplication;
+	private String calculateCapacityCreditApplication;
 	
 }

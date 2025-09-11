@@ -19,6 +19,10 @@ public class CalculateAmortizingLoan {
 			return divide(amountLoan, BigDecimal.valueOf(termInMonths));
 		}
 		
+		if (termInMonths <= 0 || amountLoan.compareTo(BigDecimal.ZERO) <= 0) {
+			return BigDecimal.ZERO;
+		}
+		
 		BigDecimal monthlyInterestRate = divide(annualInterestRate, BigDecimal.valueOf((MONTHS_IN_YEAR * 100)));
 		BigDecimal onePlusRPowerN = (BigDecimal.ONE.add(monthlyInterestRate)).pow(termInMonths);
 		BigDecimal numerator = amountLoan.multiply(monthlyInterestRate).multiply(onePlusRPowerN);

@@ -6,6 +6,7 @@ import java.util.List;
 
 public record StatusUpdatedPayload(
 	String name,
+	String email,
 	String amount,
 	boolean isApproved,
 	List<Installment> paymentPlan

@@ -33,6 +33,7 @@ public class SQSUpdateStateSender implements MessageChangeStatusService {
     public Mono<String> sendChangeStateCreditApplication(CreditApplication creditApplication, List<Installment> paymentPlan) {
         return Mono.fromCallable(() -> new StatusUpdatedPayload(
                 creditApplication.getClientName(),
+                creditApplication.getEmail(),
                 getCurrencyInstance(Locale.US).format(creditApplication.getAmount()),
                 creditApplication.getState().equals(StateCreditApplication.APPROVED),
                 paymentPlan

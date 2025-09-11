@@ -62,4 +62,37 @@ class CalculateAmortizingLoanTest {
         
         assertThat(result).isEqualByComparingTo(BigDecimal.ZERO);
     }
+
+    @Test
+    void shouldReturnZero_whenInterestRateIsPositiveAndTermIsZero() {
+        BigDecimal amount = new BigDecimal(1000);
+        BigDecimal interest = new BigDecimal(10);
+        int term = 0;
+
+        BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
+
+        assertThat(result).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    void shouldHandleNegativeInterestRate() {
+        BigDecimal amount = new BigDecimal(1000);
+        BigDecimal interest = new BigDecimal(-5);
+        int term = 12;
+
+        BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
+
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    void shouldHandleNegativeTerm() {
+        BigDecimal amount = new BigDecimal(1000);
+        BigDecimal interest = new BigDecimal(10);
+        int term = -12;
+
+        BigDecimal result = CalculateAmortizingLoan.calculateMonthlyPayment(amount, interest, term);
+
+        assertThat(result).isEqualTo(BigDecimal.ZERO);
+    }
 }

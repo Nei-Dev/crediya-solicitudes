@@ -65,7 +65,7 @@ class UpdateStateCreditApplicationUseCaseTest {
     }
 
     @Test
-    void execute_validUpdate_shouldUpdateStateAndSendMessage() {
+    void execute_validUpdate_shouldUpdateStateRejectedAndSendMessage() {
         when(creditApplicationRepository.findById(1L)).thenReturn(Mono.just(creditApplication));
         when(creditApplicationRepository.saveCreditApplication(any(CreditApplication.class)))
             .thenAnswer(invocation -> {
@@ -83,6 +83,32 @@ class UpdateStateCreditApplicationUseCaseTest {
         when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class), anyList())).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(1L, REJECTED))
+                .verifyComplete();
+        verify(creditApplicationRepository, times(1)).saveCreditApplication(any(CreditApplication.class));
+        verify(messageChangeStatusService).sendChangeStateCreditApplication(any(CreditApplication.class), anyList());
+    }
+    
+    @Test
+    void execute_validUpdate_shouldUpdateStateApprovedAndSendMessage() {
+        when(creditApplicationRepository.findById(1L)).thenReturn(Mono.just(creditApplication));
+        when(creditApplicationRepository.saveCreditApplication(any(CreditApplication.class)))
+            .thenAnswer(invocation -> {
+                CreditApplication ca = invocation.getArgument(0);
+                if (ca.getState() == APPROVED) {
+                    return Mono.just(CreditApplication.builder()
+                        .id(ca.getId())
+                        .state(APPROVED)
+                        .idCreditType(ca.getIdCreditType())
+                        .amount(BigDecimal.valueOf(1000))
+                        .term(12)
+                        .build());
+                }
+                return Mono.just(ca);
+            });
+        when(creditTypeRepository.findById(creditApplication.getIdCreditType())).thenReturn(Mono.just(creditType));
+        when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class), anyList())).thenReturn(Mono.empty());
+
+        StepVerifier.create(useCase.execute(1L, APPROVED))
                 .verifyComplete();
         verify(creditApplicationRepository, times(1)).saveCreditApplication(any(CreditApplication.class));
         verify(messageChangeStatusService).sendChangeStateCreditApplication(any(CreditApplication.class), anyList());

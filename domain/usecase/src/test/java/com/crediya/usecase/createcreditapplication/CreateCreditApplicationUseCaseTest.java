@@ -21,8 +21,10 @@ import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static com.crediya.model.constants.CreateCreditApplicationErrorMessage.*;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -240,8 +242,9 @@ class CreateCreditApplicationUseCaseTest {
             .expectNextMatches(result -> result.getAmount().equals(creditApplicationWithSalary.getAmount()))
             .verifyComplete();
         
-        verify(messageDebtCapacityService, times(1))
-            .sendCalculateDebtCapacity(any());
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(() ->
+            verify(messageDebtCapacityService, times(1)).sendCalculateDebtCapacity(any())
+        );
     }
     
     @Test
@@ -346,6 +349,9 @@ class CreateCreditApplicationUseCaseTest {
             .thenReturn(Mono.just(autoValidationCreditType));
         when(creditApplicationRepository.saveCreditApplication(any(CreditApplication.class)))
             .thenReturn(Mono.just(creditApplicationWithSalary));
+        lenient().when(creditApplicationRepository.findTotalMonthlyDebt(creditApplicationWithSalary.getEmail()))
+            .thenReturn(Mono.just(BigDecimal.valueOf(100)));
+        lenient().when(messageDebtCapacityService.sendCalculateDebtCapacity(any())).thenReturn(Mono.error(new RuntimeException("Messaging error")));
         
         try (MockedStatic<CalculateAmortizingLoan> mocked = mockStatic(CalculateAmortizingLoan.class)) {
             mocked.when(() -> CalculateAmortizingLoan.calculateMonthlyPayment(any(BigDecimal.class), eq(BigDecimal.ONE), eq(2)))

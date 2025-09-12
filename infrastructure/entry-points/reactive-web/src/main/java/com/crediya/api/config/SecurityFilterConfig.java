@@ -67,6 +67,7 @@ public class SecurityFilterConfig implements WebFluxConfigurer {
                 .pathMatchers(POST, path.getCreateApplication()).hasRole(UserRole.CLIENT.name())
                 .pathMatchers(GET, path.getListCreditApplication()).hasRole(UserRole.MANAGER.name())
                 .pathMatchers(PUT, path.getUpdateStateCreditApplication()).hasRole(UserRole.MANAGER.name())
+                .pathMatchers(POST, path.getCalculateCapacityCreditApplication()).hasRole(UserRole.MANAGER.name())
                 .anyExchange().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions

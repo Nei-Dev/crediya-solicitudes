@@ -1,8 +1,8 @@
-package com.crediya.sqs.listener;
+package com.crediya.sqs.listener.helper;
 
 import com.crediya.sqs.listener.config.SQSCreditEvaluationProperties;
 import lombok.Builder;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-@Log4j2
+@Slf4j
 @Builder
 public class SQSCreditEvaluationListener {
     private final SqsAsyncClient client;

@@ -1,6 +1,6 @@
 package com.crediya.sqs.listener.config;
 
-import com.crediya.sqs.listener.SQSCreditEvaluationListener;
+import com.crediya.sqs.listener.helper.SQSCreditEvaluationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;

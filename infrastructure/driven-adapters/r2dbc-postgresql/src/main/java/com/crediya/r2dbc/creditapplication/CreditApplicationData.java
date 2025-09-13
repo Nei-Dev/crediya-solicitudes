@@ -1,4 +1,4 @@
-package com.crediya.r2dbc.entities;
+package com.crediya.r2dbc.creditapplication;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

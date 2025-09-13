@@ -8,7 +8,6 @@ import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
 import com.crediya.model.helpers.CalculateAmortizingLoan;
 import com.crediya.model.helpers.SortDirection;
-import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.exceptions.StateNotFoundException;
 import com.crediya.r2dbc.mappers.CreditApplicationEntityMapper;
 import com.crediya.r2dbc.statecreditapplication.StateCreditApplicationReactiveRepository;

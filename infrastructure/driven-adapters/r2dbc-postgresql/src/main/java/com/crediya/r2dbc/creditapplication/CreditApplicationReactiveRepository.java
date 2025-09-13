@@ -1,6 +1,5 @@
 package com.crediya.r2dbc.creditapplication;
 
-import com.crediya.r2dbc.entities.CreditApplicationData;
 import com.crediya.r2dbc.projections.CreditApplicationDataDebt;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;

@@ -1,7 +1,7 @@
 package com.crediya.r2dbc.mappers;
 
 import com.crediya.model.creditapplication.CreditApplication;
-import com.crediya.r2dbc.entities.CreditApplicationData;
+import com.crediya.r2dbc.creditapplication.CreditApplicationData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

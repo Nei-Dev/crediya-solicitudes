@@ -7,8 +7,8 @@ import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.sqs.sender.config.SQSUpdateStateSenderProperties;
 import com.crediya.sqs.sender.dto.creditapplication.StatusUpdatedPayload;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
@@ -20,14 +20,19 @@ import java.util.Locale;
 
 import static java.text.NumberFormat.getCurrencyInstance;
 
-@Service
 @Slf4j
-@RequiredArgsConstructor
+@Service
 public class SQSUpdateStateSender implements MessageChangeStatusService {
+    
     private final SQSUpdateStateSenderProperties properties;
     private final SqsAsyncClient client;
     
     private final Gson gson = new Gson();
+    
+    public SQSUpdateStateSender(SQSUpdateStateSenderProperties properties, @Qualifier("configUpdateStateSqs") SqsAsyncClient client) {
+        this.properties = properties;
+        this.client = client;
+    }
     
     @Override
     public Mono<String> sendChangeStateCreditApplication(CreditApplication creditApplication, List<Installment> paymentPlan) {

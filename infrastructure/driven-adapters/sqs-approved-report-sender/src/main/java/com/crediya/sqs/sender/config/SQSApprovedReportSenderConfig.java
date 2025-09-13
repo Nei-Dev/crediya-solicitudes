@@ -1,34 +1,19 @@
-package com.crediya.sqs.listener.config;
+package com.crediya.sqs.sender.config;
 
-import com.crediya.sqs.listener.helper.SQSCreditEvaluationListener;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import reactor.core.publisher.Mono;
 import software.amazon.awssdk.auth.credentials.*;
 import software.amazon.awssdk.metrics.MetricPublisher;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
-import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.net.URI;
-import java.util.function.Function;
 
 @Configuration
-public class SQSCreditEvaluationConfig {
+public class SQSApprovedReportSenderConfig {
 
-    @Bean
-    public SQSCreditEvaluationListener sqsListener(@Qualifier("configCreditEvaluatedSqs") SqsAsyncClient client, SQSCreditEvaluationProperties properties, Function<Message, Mono<Void>> fn) {
-        return SQSCreditEvaluationListener.builder()
-                .client(client)
-                .properties(properties)
-                .processor(fn)
-                .build()
-                .start();
-    }
-
-    @Bean(name = "configCreditEvaluatedSqs")
-    public SqsAsyncClient configCreditEvaluatedSqs(SQSCreditEvaluationProperties properties, MetricPublisher publisher) {
+    @Bean(name = "configApprovedReportSqs")
+    public SqsAsyncClient configApprovedReportSqs(SQSApprovedReportSenderProperties properties, MetricPublisher publisher) {
         return SqsAsyncClient.builder()
                 .endpointOverride(resolveEndpoint(properties))
                 .region(Region.of(properties.region()))
@@ -48,7 +33,7 @@ public class SQSCreditEvaluationConfig {
                 .build();
     }
 
-    protected URI resolveEndpoint(SQSCreditEvaluationProperties properties) {
+    private URI resolveEndpoint(SQSApprovedReportSenderProperties properties) {
         if (properties.endpoint() != null) {
             return URI.create(properties.endpoint());
         }

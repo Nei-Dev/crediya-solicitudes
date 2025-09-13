@@ -1,10 +1,11 @@
 package com.crediya.sqs.sender;
 
-import com.crediya.model.creditapplication.DebtCapacityCredit;
-import com.crediya.model.creditapplication.gateways.MessageDebtCapacityService;
-import com.crediya.sqs.sender.config.SQSDebtCapacitySenderProperties;
+import com.crediya.model.creditapplication.CreditApplication;
+import com.crediya.model.creditapplication.gateways.MessageApprovedCreditService;
+import com.crediya.sqs.sender.config.SQSApprovedReportSenderProperties;
+import com.crediya.sqs.sender.dto.CreditApproved;
 import com.google.gson.Gson;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -12,23 +13,24 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+@Slf4j
 @Service
-@Log4j2
-public class SQSDebtCapacitySender implements MessageDebtCapacityService {
+public class SQSApprovedReportSender implements MessageApprovedCreditService {
     
-    private final SQSDebtCapacitySenderProperties properties;
+    private final SQSApprovedReportSenderProperties properties;
     private final SqsAsyncClient client;
     
     private final Gson gson = new Gson();
     
-    public SQSDebtCapacitySender(SQSDebtCapacitySenderProperties properties, @Qualifier("configDebCapacitySqs") SqsAsyncClient client) {
+    public SQSApprovedReportSender(SQSApprovedReportSenderProperties properties, @Qualifier("configApprovedReportSqs") SqsAsyncClient client) {
         this.properties = properties;
         this.client = client;
     }
     
     @Override
-    public Mono<String> sendCalculateDebtCapacity(DebtCapacityCredit debtCapacityCredit) {
-        return Mono.fromCallable(() -> gson.toJson(debtCapacityCredit))
+    public Mono<String> sendApprovedCreditApplication(CreditApplication creditApplication) {
+        return Mono.fromCallable(() -> new CreditApproved(creditApplication.getId(), creditApplication.getAmount()))
+            .map(gson::toJson)
             .flatMap(this::send);
     }
     

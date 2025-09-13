@@ -4,6 +4,7 @@ import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.Installment;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
+import com.crediya.model.creditapplication.gateways.MessageApprovedCreditService;
 import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.creditapplication.ports.IUpdateStateCreditApplicationUseCase;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
@@ -28,6 +29,7 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 	private final CreditApplicationRepository creditApplicationRepository;
 	private final CreditTypeRepository creditTypeRepository;
 	private final MessageChangeStatusService messageChangeStatusService;
+	private final MessageApprovedCreditService messageApprovedCreditService;
 	
 	@Override
 	public Mono<Void> execute(Long idCreditApplication, StateCreditApplication newState) {
@@ -54,7 +56,7 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 		
 		return creditApplicationRepository.saveCreditApplication(creditApplication)
 			.filter(ca -> isFinalState(ca.getState()))
-			.flatMap(saved -> sendChangeMessage(saved, previousState))
+			.flatMap(saved -> sendMessages(saved, previousState))
 			.then();
 	}
 	
@@ -62,7 +64,7 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 		return List.of(APPROVED, REJECTED).contains(state);
 	}
 	
-	private Mono<Void> sendChangeMessage(CreditApplication creditApplication, StateCreditApplication previousState) {
+	private Mono<Void> sendMessages(CreditApplication creditApplication, StateCreditApplication previousState) {
 		return creditTypeRepository.findById(creditApplication.getIdCreditType())
 			.switchIfEmpty(Mono.error(new CreditTypeNotFoundException(CREDIT_TYPE_NOT_FOUND)))
 			.flatMap(creditType -> creditApplication.getState().equals(APPROVED) ? Mono.just(CalculateAmortizingLoan.generatePaymentPlan(
@@ -70,7 +72,10 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 				creditType.getInterestRate(),
 				creditApplication.getTerm()
 			)) : Mono.just(List.<Installment>of()))
-			.flatMap(paymentPlan -> messageChangeStatusService.sendChangeStateCreditApplication(creditApplication, paymentPlan))
+			.flatMap(paymentPlan -> Mono.zip(
+				messageChangeStatusService.sendChangeStateCreditApplication(creditApplication, paymentPlan),
+				messageApprovedCreditService.sendApprovedCreditApplication(creditApplication)
+			))
 			.then()
 			.onErrorResume(ex -> rollbackState(creditApplication, previousState, ex));
 	}

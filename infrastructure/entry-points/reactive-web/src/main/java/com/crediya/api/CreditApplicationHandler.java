@@ -12,12 +12,12 @@ import com.crediya.model.auth.ports.IAuthUseCase;
 import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.PaginationCreditApplicationFilter;
 import com.crediya.model.creditapplication.StateCreditApplication;
+import com.crediya.model.creditapplication.ports.ICalculateCapacityUseCase;
 import com.crediya.model.creditapplication.ports.ICreateCreditApplicationUseCase;
 import com.crediya.model.creditapplication.ports.IGetCreditApplicationPaginatedUseCase;
 import com.crediya.model.creditapplication.ports.IUpdateStateCreditApplicationUseCase;
 import com.crediya.model.exceptions.creditapplication.InvalidCreditApplicationException;
 import com.crediya.model.helpers.SortDirection;
-import com.crediya.usecase.calculatecapacity.CalculateCapacityUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,7 +43,7 @@ public class CreditApplicationHandler {
 	private final ICreateCreditApplicationUseCase createCreditApplicationUseCase;
 	private final IGetCreditApplicationPaginatedUseCase getCreditApplicationPaginatedUseCase;
 	private final IUpdateStateCreditApplicationUseCase updateStateCreditApplicationUseCase;
-	private final CalculateCapacityUseCase calculateCapacityApplicationUseCase;
+	private final ICalculateCapacityUseCase calculateCapacityApplicationUseCase;
 	
 	public Mono<ServerResponse> createApplication(ServerRequest serverRequest) {
 		return serverRequest.bodyToMono(CreateCreditApplicationRequest.class)

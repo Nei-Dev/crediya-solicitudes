@@ -3,6 +3,7 @@ package com.crediya.usecase.updatestatecreditapplication;
 import com.crediya.model.creditapplication.CreditApplication;
 import com.crediya.model.creditapplication.StateCreditApplication;
 import com.crediya.model.creditapplication.gateways.CreditApplicationRepository;
+import com.crediya.model.creditapplication.gateways.MessageApprovedCreditService;
 import com.crediya.model.creditapplication.gateways.MessageChangeStatusService;
 import com.crediya.model.credittype.CreditType;
 import com.crediya.model.credittype.gateways.CreditTypeRepository;
@@ -43,6 +44,9 @@ class UpdateStateCreditApplicationUseCaseTest {
 
     @Mock
     private MessageChangeStatusService messageChangeStatusService;
+    
+    @Mock
+    private MessageApprovedCreditService messageApprovedCreditService;
 
     private CreditApplication creditApplication;
     private CreditType creditType;
@@ -81,11 +85,13 @@ class UpdateStateCreditApplicationUseCaseTest {
             });
         when(creditTypeRepository.findById(creditApplication.getIdCreditType())).thenReturn(Mono.just(creditType));
         when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class), anyList())).thenReturn(Mono.empty());
+        when(messageApprovedCreditService.sendApprovedCreditApplication(any(CreditApplication.class))).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(1L, REJECTED))
                 .verifyComplete();
         verify(creditApplicationRepository, times(1)).saveCreditApplication(any(CreditApplication.class));
         verify(messageChangeStatusService).sendChangeStateCreditApplication(any(CreditApplication.class), anyList());
+        verify(messageApprovedCreditService).sendApprovedCreditApplication(any(CreditApplication.class));
     }
     
     @Test
@@ -107,11 +113,13 @@ class UpdateStateCreditApplicationUseCaseTest {
             });
         when(creditTypeRepository.findById(creditApplication.getIdCreditType())).thenReturn(Mono.just(creditType));
         when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class), anyList())).thenReturn(Mono.empty());
+        when(messageApprovedCreditService.sendApprovedCreditApplication(any(CreditApplication.class))).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(1L, APPROVED))
                 .verifyComplete();
         verify(creditApplicationRepository, times(1)).saveCreditApplication(any(CreditApplication.class));
         verify(messageChangeStatusService).sendChangeStateCreditApplication(any(CreditApplication.class), anyList());
+        verify(messageApprovedCreditService).sendApprovedCreditApplication(any(CreditApplication.class));
     }
 
     @Test

@@ -74,7 +74,7 @@ public class UpdateStateCreditApplicationUseCase implements IUpdateStateCreditAp
 			)) : Mono.just(List.<Installment>of()))
 			.flatMap(paymentPlan -> Mono.zip(
 				messageChangeStatusService.sendChangeStateCreditApplication(creditApplication, paymentPlan),
-				paymentPlan.isEmpty() ? Mono.empty() : messageApprovedCreditService.sendApprovedCreditApplication(creditApplication)
+				creditApplication.getState().equals(APPROVED) ? messageApprovedCreditService.sendApprovedCreditApplication(creditApplication) : Mono.empty()
 			))
 			.then()
 			.onErrorResume(ex -> rollbackState(creditApplication, previousState, ex));

@@ -85,13 +85,11 @@ class UpdateStateCreditApplicationUseCaseTest {
             });
         when(creditTypeRepository.findById(creditApplication.getIdCreditType())).thenReturn(Mono.just(creditType));
         when(messageChangeStatusService.sendChangeStateCreditApplication(any(CreditApplication.class), anyList())).thenReturn(Mono.empty());
-        when(messageApprovedCreditService.sendApprovedCreditApplication(any(CreditApplication.class))).thenReturn(Mono.empty());
 
         StepVerifier.create(useCase.execute(1L, REJECTED))
                 .verifyComplete();
         verify(creditApplicationRepository, times(1)).saveCreditApplication(any(CreditApplication.class));
         verify(messageChangeStatusService).sendChangeStateCreditApplication(any(CreditApplication.class), anyList());
-        verify(messageApprovedCreditService).sendApprovedCreditApplication(any(CreditApplication.class));
     }
     
     @Test

@@ -1,33 +1,33 @@
 server:
-  port: "${PORT:8080}"
+  port: ${PORT:8080}
 spring:
   application:
-    name: "applications"
+    name: applications
   devtools:
     add-properties: false
 app:
   paths:
     credit-application:
-      createApplication: "/api/v1/credit-application"
-      listCreditApplication: "/api/v1/credit-application"
-      updateStateCreditApplication: "/api/v1/credit-application/update-state"
-      calculateCapacityCreditApplication: "/api/v1/calculate-capacity/{idCreditApplication}"
+      createApplication: /api/v1/credit-application
+      listCreditApplication: /api/v1/credit-application
+      updateStateCreditApplication: /api/v1/credit-application/update-state
+      calculateCapacityCreditApplication: /api/v1/calculate-capacity/{idCreditApplication}
 adapters:
   r2dbc:
-    host: "${DB_HOST:localhost}"
-    port: "${DB_PORT:5441}"
-    database: "${DB_NAME:solicitudes_db}"
-    schema: "${DB_SCHEMA:public}"
-    username: "${DB_USER:postgres}"
-    password: "${DB_PASSWORD:postgres}"
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5441}
+    database: ${DB_NAME:solicitudes_db}
+    schema: ${DB_SCHEMA:public}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
 logging:
   level:
-    com.crediya: "${LOG_LEVEL:INFO}"
+    com.crediya: ${LOG_LEVEL:INFO}
 management:
   endpoints:
     web:
       exposure:
-        include: "health,prometheus"
+        include: health,prometheus
   endpoint:
     health:
       probes:
@@ -36,23 +36,23 @@ management:
     circuitbreakers:
       enabled: true
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: http://localhost:4200,http://localhost:8080
 adapter:
   restconsumer:
     timeout: 5000
-    url: "${AUTH_URL:http://localhost:8080/api}"
+    url: ${AUTH_URL:http://localhost:8080/api}
     path:
-      me: "/v1/auth/me"
+      me: /v1/auth/me
   sqs:
     update-state:
-      region: "${SQS_UPDATE_STATE_REGION}"
-      queueUrl: "${SQS_UPDATE_STATE_QUEUE_URL}"
+      region: ${SQS_UPDATE_STATE_REGION}
+      queueUrl: ${SQS_UPDATE_STATE_QUEUE_URL}
     debt-capacity:
-      region: "${SQS_DEBT_CAPACITY_REGION}"
-      queueUrl: "${SQS_DEBT_CAPACITY_QUEUE_URL}"
+      region: ${SQS_DEBT_CAPACITY_REGION}
+      queueUrl: ${SQS_DEBT_CAPACITY_QUEUE_URL}
     approved-report:
-      region: "${SQS_APPROVED_REPORT_REGION}"
-      queueUrl: "${SQS_APPROVED_REPORT_QUEUE_URL}"
+      region: ${SQS_APPROVED_REPORT_REGION}
+      queueUrl: ${SQS_APPROVED_REPORT_QUEUE_URL}
 resilience4j:
   circuitbreaker:
     instances:
@@ -60,27 +60,27 @@ resilience4j:
         registerHealthIndicator: true
         failureRateThreshold: 50
         slowCallRateThreshold: 50
-        slowCallDurationThreshold: "2s"
+        slowCallDurationThreshold: 2s
         permittedNumberOfCallsInHalfOpenState: 3
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
-        waitDurationInOpenState: "10s"
+        waitDurationInOpenState: 10s
       testPost:
         registerHealthIndicator: true
         failureRateThreshold: 50
         slowCallRateThreshold: 50
-        slowCallDurationThreshold: "2s"
+        slowCallDurationThreshold: 2s
         permittedNumberOfCallsInHalfOpenState: 3
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
-        waitDurationInOpenState: "10s"
+        waitDurationInOpenState: 10s
 jwt:
-  secret: "${JWT_SECRET}"
+  secret: ${JWT_SECRET}
 entrypoint:
   sqs:
     credit-evaluation:
-      region: "${SQS_CREDIT_EVALUATION_REGION}"
-      queueUrl: "${SQS_CREDIT_EVALUATION_QUEUE_URL}"
+      region: ${SQS_CREDIT_EVALUATION_REGION}
+      queueUrl: ${SQS_CREDIT_EVALUATION_QUEUE_URL}
       waitTimeSeconds: 20
       maxNumberOfMessages: 10
       visibilityTimeoutSeconds: 10

@@ -1,7 +1,5 @@
 server:
   port: "${PORT:8080}"
-  servlet:
-    context-path: "/applications"
 spring:
   application:
     name: "applications"

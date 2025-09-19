@@ -8,10 +8,10 @@ spring:
 app:
   paths:
     credit-application:
-      createApplication: /api/v1/credit-application
-      listCreditApplication: /api/v1/credit-application
-      updateStateCreditApplication: /api/v1/credit-application/update-state
-      calculateCapacityCreditApplication: /api/v1/calculate-capacity/{idCreditApplication}
+      createApplication: /applications/api/v1/credit-application
+      listCreditApplication: /applications/api/v1/credit-application
+      updateStateCreditApplication: /applications/api/v1/credit-application/update-state
+      calculateCapacityCreditApplication: /applications/api/v1/calculate-capacity/{idCreditApplication}
 adapters:
   r2dbc:
     host: ${DB_HOST:localhost}
@@ -40,9 +40,9 @@ cors:
 adapter:
   restconsumer:
     timeout: 5000
-    url: ${AUTH_URL:http://localhost:8080/api}
+    url: ${AUTH_URL:http://localhost:8080}
     path:
-      me: /v1/auth/me
+      me: /auth/api/v1/auth/me
   sqs:
     update-state:
       region: ${SQS_UPDATE_STATE_REGION}

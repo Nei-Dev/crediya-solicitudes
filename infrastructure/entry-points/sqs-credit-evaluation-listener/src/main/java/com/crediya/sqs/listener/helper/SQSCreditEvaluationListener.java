@@ -11,8 +11,6 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 @Slf4j
@@ -27,10 +25,9 @@ public class SQSCreditEvaluationListener {
 
     public SQSCreditEvaluationListener start() {
         this.operation = "MessageFrom:" + properties.queueUrl();
-        ExecutorService service = Executors.newFixedThreadPool(properties.numberOfThreads());
-        Flux<Void> flow = listenRetryRepeat().publishOn(Schedulers.fromExecutorService(service));
         for (var i = 0; i < properties.numberOfThreads(); i++) {
-            flow.subscribe();
+            listenRetryRepeat().subscribeOn(Schedulers.boundedElastic())
+                .subscribe();
         }
         return this;
     }
